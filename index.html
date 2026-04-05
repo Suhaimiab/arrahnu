@@ -131,6 +131,30 @@
               </button>
             </div>
           </div>
+          <!-- Extra Charges Toggle -->
+          <div class="mt-4 pt-4 border-t border-dark-600">
+            <button @click="calc.showExtraCharges = !calc.showExtraCharges"
+              class="text-sm text-gold-400 hover:text-gold-300 transition">
+              {{ calc.showExtraCharges ? '▾' : '▸' }} {{ t.extraCharges }}
+            </button>
+            <div v-if="calc.showExtraCharges" class="mt-3 grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-sm text-gray-400 mb-1">{{ t.insuranceFee }} (RM)</label>
+                <input type="number" v-model.number="calc.insurance" min="0" step="0.01"
+                  class="w-full bg-dark-800 border border-dark-600 rounded-lg px-3 py-2 text-gray-100 focus:border-gold-500 focus:outline-none" placeholder="0.00">
+              </div>
+              <div>
+                <label class="block text-sm text-gray-400 mb-1">{{ t.processingFee }} (RM)</label>
+                <input type="number" v-model.number="calc.processingFee" min="0" step="0.01"
+                  class="w-full bg-dark-800 border border-dark-600 rounded-lg px-3 py-2 text-gray-100 focus:border-gold-500 focus:outline-none" placeholder="0.00">
+              </div>
+              <div>
+                <label class="block text-sm text-gray-400 mb-1">{{ t.otherFees }} (RM)</label>
+                <input type="number" v-model.number="calc.otherFees" min="0" step="0.01"
+                  class="w-full bg-dark-800 border border-dark-600 rounded-lg px-3 py-2 text-gray-100 focus:border-gold-500 focus:outline-none" placeholder="0.00">
+              </div>
+            </div>
+          </div>
         </div>
 
         <div v-if="!goldPrice && calc.weight" class="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4 text-sm text-yellow-400">
@@ -201,6 +225,119 @@
               <span class="text-xl font-bold text-gold-400">RM {{ formatNumber(calcTotalRepayment) }}</span>
             </div>
             <p class="text-xs text-gray-400 mt-1">{{ t.financing }}: RM {{ formatNumber(calcFinancing) }} + {{ t.profit }}: RM {{ formatNumber(calcTotalProfit) }}</p>
+          </div>
+        </div>
+
+        <!-- Fee & Charges Breakdown -->
+        <div v-if="calc.weight && goldPrice" class="bg-dark-700 rounded-xl p-6 border border-dark-600">
+          <h2 class="text-lg font-semibold text-gold-400 mb-4">{{ t.feeChargesTitle }}</h2>
+
+          <!-- Detailed Cost Table -->
+          <div class="overflow-x-auto mb-6">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="text-gray-400 border-b border-dark-600">
+                  <th class="text-left py-2">{{ t.chargeItem }}</th>
+                  <th class="text-right py-2">{{ t.amount }} (RM)</th>
+                  <th class="text-right py-2">{{ t.remarks }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="border-b border-dark-600/50">
+                  <td class="py-2 text-gray-300">{{ t.profitCharge }}</td>
+                  <td class="text-right text-red-400 font-medium">{{ formatNumber(calcTotalProfit) }}</td>
+                  <td class="text-right text-xs text-gray-500">RM{{ calcProfitRate.toFixed(2) }}/RM100 x {{ calc.tenure }}{{ t.monthsShort }}</td>
+                </tr>
+                <tr class="border-b border-dark-600/50">
+                  <td class="py-2 text-gray-300">{{ t.storageFee }}</td>
+                  <td class="text-right text-green-400">0.00</td>
+                  <td class="text-right text-xs text-gray-500">{{ t.storageNil }}</td>
+                </tr>
+                <tr v-if="calc.insurance" class="border-b border-dark-600/50">
+                  <td class="py-2 text-gray-300">{{ t.insuranceFee }}</td>
+                  <td class="text-right text-red-400">{{ formatNumber(calc.insurance) }}</td>
+                  <td class="text-right text-xs text-gray-500">{{ t.optional }}</td>
+                </tr>
+                <tr v-if="calc.processingFee" class="border-b border-dark-600/50">
+                  <td class="py-2 text-gray-300">{{ t.processingFee }}</td>
+                  <td class="text-right text-red-400">{{ formatNumber(calc.processingFee) }}</td>
+                  <td class="text-right text-xs text-gray-500">{{ t.optional }}</td>
+                </tr>
+                <tr v-if="calc.otherFees" class="border-b border-dark-600/50">
+                  <td class="py-2 text-gray-300">{{ t.otherFees }}</td>
+                  <td class="text-right text-red-400">{{ formatNumber(calc.otherFees) }}</td>
+                  <td class="text-right text-xs text-gray-500">{{ t.optional }}</td>
+                </tr>
+                <tr class="font-semibold border-t-2 border-gold-500/30">
+                  <td class="py-2 text-gold-300">{{ t.totalFees }}</td>
+                  <td class="text-right text-gold-400">{{ formatNumber(calcTotalFees) }}</td>
+                  <td class="text-right text-xs text-gray-500">{{ t.allCharges }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Per-Cycle Payment Schedule -->
+          <h3 class="text-sm font-semibold text-gold-300 mb-3">{{ t.cycleBreakdown }}</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div v-for="c in 3" :key="c" class="bg-dark-800 rounded-lg p-4" :class="c * 6 <= calc.tenure ? '' : 'opacity-40'">
+              <p class="text-xs text-gray-400 mb-1">{{ t.cycle }} {{ c }} <span class="text-gray-600">({{ t.month }} {{ (c-1)*6 + 1 }}–{{ c*6 }})</span></p>
+              <p class="text-lg font-bold" :class="c * 6 <= calc.tenure ? 'text-red-400' : 'text-gray-600'">RM {{ formatNumber(calcMonthlyProfit * 6) }}</p>
+              <p class="text-xs text-gray-500">{{ t.dueBy }}: {{ t.month }} {{ c * 6 }}</p>
+            </div>
+          </div>
+
+          <!-- Daily & Percentage Costs -->
+          <h3 class="text-sm font-semibold text-gold-300 mb-3">{{ t.costAnalysis }}</h3>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-dark-800 rounded-lg p-4">
+              <p class="text-xs text-gray-400">{{ t.dailyCost }}</p>
+              <p class="text-lg font-bold text-red-400">RM {{ formatNumber(calcDailyCost) }}</p>
+            </div>
+            <div class="bg-dark-800 rounded-lg p-4">
+              <p class="text-xs text-gray-400">{{ t.weeklyCost }}</p>
+              <p class="text-lg font-bold text-red-400">RM {{ formatNumber(calcDailyCost * 7) }}</p>
+            </div>
+            <div class="bg-dark-800 rounded-lg p-4">
+              <p class="text-xs text-gray-400">{{ t.costPctGold }}</p>
+              <p class="text-lg font-bold text-yellow-400">{{ calcCostPctGold.toFixed(2) }}%</p>
+              <p class="text-xs text-gray-500">{{ t.ofGoldValue }}</p>
+            </div>
+            <div class="bg-dark-800 rounded-lg p-4">
+              <p class="text-xs text-gray-400">{{ t.costPctFinancing }}</p>
+              <p class="text-lg font-bold text-yellow-400">{{ calcCostPctFinancing.toFixed(2) }}%</p>
+              <p class="text-xs text-gray-500">{{ t.ofFinancingAmt }}</p>
+            </div>
+          </div>
+
+          <!-- Total Cost Summary -->
+          <div class="bg-gold-500/10 border border-gold-500/30 rounded-lg p-4">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-gold-300 font-medium">{{ t.totalCostSummary }}</span>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+              <div>
+                <p class="text-xs text-gray-500">{{ t.youReceive }}</p>
+                <p class="font-bold text-green-400">RM {{ formatNumber(calcFinancing) }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500">{{ t.youPayBack }}</p>
+                <p class="font-bold text-red-400">RM {{ formatNumber(calcGrandTotal) }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500">{{ t.totalCostToPawn }}</p>
+                <p class="font-bold text-gold-400">RM {{ formatNumber(calcGrandTotal - calcFinancing) }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500">{{ t.effectiveCostPct }}</p>
+                <p class="font-bold text-yellow-400">{{ calcFinancing ? (((calcGrandTotal - calcFinancing) / calcFinancing) * 100).toFixed(1) : 0 }}%</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Late Payment Note -->
+          <div class="mt-4 bg-red-500/5 border border-red-500/20 rounded-lg p-3">
+            <p class="text-xs text-red-400/80">{{ t.latePaymentNote }}</p>
           </div>
         </div>
       </div>
@@ -861,6 +998,37 @@
         paymentSchedule: 'Payment Schedule',
         cycle: 'Cycle',
         enterGoldPrice: 'Please enter or wait for gold price to load',
+        // Fee & Charges
+        extraCharges: 'Additional Charges (Optional)',
+        insuranceFee: 'Insurance / Takaful',
+        processingFee: 'Processing Fee',
+        otherFees: 'Other Fees',
+        feeChargesTitle: 'Fee & Charges Breakdown',
+        chargeItem: 'Charge Item',
+        amount: 'Amount',
+        remarks: 'Remarks',
+        profitCharge: 'Profit Charge (Upah Simpan)',
+        storageFee: 'Storage Fee',
+        storageNil: 'Included in profit rate (nil)',
+        optional: 'Optional',
+        totalFees: 'Total Fees & Charges',
+        allCharges: 'All charges combined',
+        cycleBreakdown: 'Payment Cycle Breakdown',
+        dueBy: 'Due by',
+        costAnalysis: 'Cost Analysis',
+        dailyCost: 'Daily Cost',
+        weeklyCost: 'Weekly Cost',
+        costPctGold: 'Cost as % of Gold',
+        ofGoldValue: 'of marhun value',
+        costPctFinancing: 'Cost as % of Financing',
+        ofFinancingAmt: 'of financing amount',
+        totalCostSummary: 'Total Cost Summary',
+        youReceive: 'You Receive',
+        youPayBack: 'You Pay Back',
+        totalCostToPawn: 'Total Cost to Pawn',
+        effectiveCostPct: 'Effective Cost %',
+        latePaymentNote: 'Note: Late payment may result in the marhun (pledged items) being forfeited. Always ensure payments are made before the due date of each cycle.',
+        monthsShort: 'm',
       },
       bm: {
         goldPrice: 'Harga Emas',
@@ -991,6 +1159,37 @@
         paymentSchedule: 'Jadual Pembayaran',
         cycle: 'Kitaran',
         enterGoldPrice: 'Sila masukkan atau tunggu harga emas dimuatkan',
+        // Fee & Charges
+        extraCharges: 'Caj Tambahan (Pilihan)',
+        insuranceFee: 'Insurans / Takaful',
+        processingFee: 'Yuran Pemprosesan',
+        otherFees: 'Yuran Lain',
+        feeChargesTitle: 'Pecahan Yuran & Caj',
+        chargeItem: 'Item Caj',
+        amount: 'Jumlah',
+        remarks: 'Catatan',
+        profitCharge: 'Caj Keuntungan (Upah Simpan)',
+        storageFee: 'Yuran Simpanan',
+        storageNil: 'Termasuk dalam kadar keuntungan (tiada)',
+        optional: 'Pilihan',
+        totalFees: 'Jumlah Yuran & Caj',
+        allCharges: 'Semua caj digabungkan',
+        cycleBreakdown: 'Pecahan Kitaran Pembayaran',
+        dueBy: 'Tarikh akhir',
+        costAnalysis: 'Analisis Kos',
+        dailyCost: 'Kos Harian',
+        weeklyCost: 'Kos Mingguan',
+        costPctGold: 'Kos % daripada Emas',
+        ofGoldValue: 'daripada nilai marhun',
+        costPctFinancing: 'Kos % daripada Pembiayaan',
+        ofFinancingAmt: 'daripada jumlah pembiayaan',
+        totalCostSummary: 'Ringkasan Jumlah Kos',
+        youReceive: 'Anda Terima',
+        youPayBack: 'Anda Bayar Balik',
+        totalCostToPawn: 'Jumlah Kos Gadaian',
+        effectiveCostPct: 'Kos Efektif %',
+        latePaymentNote: 'Nota: Pembayaran lewat boleh menyebabkan marhun (barang gadaian) dilucuthak. Sentiasa pastikan pembayaran dibuat sebelum tarikh akhir setiap kitaran.',
+        monthsShort: 'b',
       },
     }
 
@@ -1012,7 +1211,11 @@
             weight: null,
             karat: 24,
             financingPct: 80,
-            tenure: 18
+            tenure: 18,
+            showExtraCharges: false,
+            insurance: 0,
+            processingFee: 0,
+            otherFees: 0
           },
           karats: [
             { value: 24, label: '24K', purity: 1.000 },
@@ -1111,6 +1314,26 @@
         calcAnnualizedRate() {
           if (!this.calcFinancing) return 0
           return (this.calcTotalProfit / this.calcFinancing) * (12 / this.calc.tenure) * 100
+        },
+        calcExtraCharges() {
+          return (this.calc.insurance || 0) + (this.calc.processingFee || 0) + (this.calc.otherFees || 0)
+        },
+        calcTotalFees() {
+          return this.calcTotalProfit + this.calcExtraCharges
+        },
+        calcGrandTotal() {
+          return this.calcFinancing + this.calcTotalFees
+        },
+        calcDailyCost() {
+          return this.calcMonthlyProfit / 30
+        },
+        calcCostPctGold() {
+          if (!this.calcMarhunValue) return 0
+          return (this.calcTotalFees / this.calcMarhunValue) * 100
+        },
+        calcCostPctFinancing() {
+          if (!this.calcFinancing) return 0
+          return (this.calcTotalFees / this.calcFinancing) * 100
         },
         simPurity() {
           const k = this.karats.find(k => k.value === this.sim.karat)
