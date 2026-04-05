@@ -94,6 +94,53 @@
     <!-- Content -->
     <main class="max-w-6xl mx-auto p-6">
       <div v-if="activeTab === 'calculator'" class="space-y-6">
+        <!-- Quick Withdrawable Amount Calculator -->
+        <div class="bg-gradient-to-r from-gold-500/10 to-dark-700 rounded-xl p-6 border border-gold-500/30">
+          <h2 class="text-lg font-semibold text-gold-400 mb-1">{{ t.withdrawTitle }}</h2>
+          <p class="text-xs text-gray-500 mb-4">{{ t.withdrawDesc }}</p>
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+            <div class="md:col-span-3">
+              <label class="block text-sm text-gray-400 mb-1">{{ t.weight }} (gm)</label>
+              <input type="number" v-model.number="withdraw.weight" min="0" step="0.01"
+                class="w-full bg-dark-800 border border-dark-600 rounded-lg px-3 py-2 text-gray-100 focus:border-gold-500 focus:outline-none" placeholder="100">
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-sm text-gray-400 mb-1">{{ t.karat }}</label>
+              <select v-model.number="withdraw.karat"
+                class="w-full bg-dark-800 border border-dark-600 rounded-lg px-3 py-2 text-gray-100 focus:border-gold-500 focus:outline-none">
+                <option v-for="k in karats" :value="k.value">{{ k.label }}</option>
+              </select>
+            </div>
+            <div class="md:col-span-3">
+              <label class="block text-sm text-gray-400 mb-1">{{ t.goldPrice }} (RM/gm)</label>
+              <input type="number" v-model.number="goldPrice" min="0" step="0.01"
+                class="w-full bg-dark-800 border border-dark-600 rounded-lg px-3 py-2 text-gray-100 focus:border-gold-500 focus:outline-none" :placeholder="t.enterPrice">
+            </div>
+            <div class="md:col-span-4">
+              <div v-if="withdrawResult.financing > 0" class="bg-dark-800 rounded-lg p-3 border border-gold-500/20">
+                <p class="text-xs text-gray-400">{{ t.withdrawAmount }} (80%)</p>
+                <p class="text-2xl font-bold text-green-400">RM {{ formatNumber(withdrawResult.financing) }}</p>
+                <p class="text-xs text-gray-500">{{ t.marhunValue }}: RM {{ formatNumber(withdrawResult.marhunValue) }}</p>
+              </div>
+              <div v-else class="bg-dark-800 rounded-lg p-3 border border-dark-600">
+                <p class="text-xs text-gray-400">{{ t.withdrawAmount }}</p>
+                <p class="text-2xl font-bold text-gray-600">RM ---</p>
+                <p class="text-xs text-gray-500">{{ t.withdrawHint }}</p>
+              </div>
+            </div>
+          </div>
+          <!-- Quick reference table -->
+          <div v-if="goldPrice" class="mt-4 pt-4 border-t border-dark-600/50">
+            <p class="text-xs text-gray-500 mb-2">{{ t.quickRef }} ({{ t.goldPrice }}: RM {{ formatNumber(goldPrice) }}/gm, 80% {{ t.financing }})</p>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
+              <div v-for="ref in withdrawQuickRef" :key="ref.weight" class="bg-dark-800/50 rounded px-3 py-2 text-center">
+                <p class="text-xs text-gray-500">{{ ref.weight }}gm {{ ref.karat }}K</p>
+                <p class="text-sm font-semibold text-green-400">RM {{ formatNumber(ref.financing) }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Input Card -->
         <div class="bg-dark-700 rounded-xl p-6 border border-dark-600">
           <h2 class="text-lg font-semibold text-gold-400 mb-4">{{ t.calcTitle }}</h2>
@@ -998,6 +1045,12 @@
         paymentSchedule: 'Payment Schedule',
         cycle: 'Cycle',
         enterGoldPrice: 'Please enter or wait for gold price to load',
+        // Withdrawable Amount
+        withdrawTitle: 'How Much Can You Withdraw?',
+        withdrawDesc: 'Enter your gold details to see the maximum financing available at current gold price (80% margin).',
+        withdrawAmount: 'Withdrawable Amount',
+        withdrawHint: 'Enter weight & gold price',
+        quickRef: 'Quick Reference',
         // Fee & Charges
         extraCharges: 'Additional Charges (Optional)',
         insuranceFee: 'Insurance / Takaful',
@@ -1159,6 +1212,12 @@
         paymentSchedule: 'Jadual Pembayaran',
         cycle: 'Kitaran',
         enterGoldPrice: 'Sila masukkan atau tunggu harga emas dimuatkan',
+        // Withdrawable Amount
+        withdrawTitle: 'Berapa Boleh Dikeluarkan?',
+        withdrawDesc: 'Masukkan butiran emas untuk melihat pembiayaan maksimum pada harga emas semasa (80% margin).',
+        withdrawAmount: 'Jumlah Boleh Dikeluarkan',
+        withdrawHint: 'Masukkan berat & harga emas',
+        quickRef: 'Rujukan Pantas',
         // Fee & Charges
         extraCharges: 'Caj Tambahan (Pilihan)',
         insuranceFee: 'Insurans / Takaful',
@@ -1207,6 +1266,11 @@
             { id: 'simulator' },
           ],
           // Calculator
+          // Withdrawable Amount
+          withdraw: {
+            weight: null,
+            karat: 24
+          },
           calc: {
             weight: null,
             karat: 24,
@@ -1276,6 +1340,27 @@
       computed: {
         t() {
           return i18n[this.lang]
+        },
+        withdrawResult() {
+          if (!this.withdraw.weight || !this.goldPrice) return { marhunValue: 0, financing: 0 }
+          const purity = (this.karats.find(k => k.value === this.withdraw.karat) || {}).purity || 1
+          const marhunValue = this.withdraw.weight * this.goldPrice * purity
+          return { marhunValue, financing: marhunValue * 0.8 }
+        },
+        withdrawQuickRef() {
+          if (!this.goldPrice) return []
+          const refs = [
+            { weight: 10, karat: 24 }, { weight: 20, karat: 24 },
+            { weight: 50, karat: 24 }, { weight: 100, karat: 24 },
+            { weight: 50, karat: 22 }, { weight: 100, karat: 22 },
+            { weight: 50, karat: 21 }, { weight: 100, karat: 21 },
+            { weight: 200, karat: 24 }, { weight: 500, karat: 24 },
+            { weight: 200, karat: 22 }, { weight: 200, karat: 21 }
+          ]
+          return refs.map(r => {
+            const purity = (this.karats.find(k => k.value === r.karat) || {}).purity || 1
+            return { ...r, financing: r.weight * this.goldPrice * purity * 0.8 }
+          })
         },
         calcPurity() {
           const k = this.karats.find(k => k.value === this.calc.karat)
