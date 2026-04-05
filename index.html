@@ -55,8 +55,11 @@
         <div class="flex items-center gap-4">
           <div class="flex items-center gap-2 bg-dark-800 rounded-lg px-3 py-1.5 text-sm">
             <span class="text-gold-300">{{ t.goldPrice }}:</span>
-            <span v-if="goldPrice" class="font-semibold text-gold-400">RM {{ formatNumber(goldPrice) }}/gm</span>
-            <span v-else class="text-gray-500">---</span>
+            <span class="text-gold-300">RM</span>
+            <input type="number" v-model.number="goldPrice" step="0.01" min="0"
+              class="w-24 bg-dark-900 border border-dark-600 rounded px-2 py-0.5 text-gold-400 font-semibold text-right focus:border-gold-500 focus:outline-none"
+              :placeholder="t.enterPrice">
+            <span class="text-gold-300">/gm</span>
             <span v-if="goldPriceUpdated" class="text-xs text-gray-500">({{ goldPriceUpdated }})</span>
             <span v-if="goldPriceStale" class="text-xs text-yellow-500">{{ t.stale }}</span>
           </div>
@@ -66,6 +69,10 @@
         </div>
       </div>
     </header>
+
+    <div class="max-w-6xl mx-auto px-4 py-2">
+      <p class="text-xs text-gray-500 italic">{{ t.disclaimer }}</p>
+    </div>
 
     <!-- Tab Navigation -->
     <nav class="bg-dark-700/50 border-b border-dark-600">
@@ -100,6 +107,8 @@
       en: {
         goldPrice: 'Gold Price',
         stale: 'stale',
+        enterPrice: 'Enter price',
+        disclaimer: 'Note: Bank Rakyat\'s valuation rate may differ from spot price. Use the bank\'s quoted rate for accurate calculations.',
         comingSoon: 'Coming soon',
         tabs: {
           calculator: 'Calculator',
@@ -110,6 +119,8 @@
       bm: {
         goldPrice: 'Harga Emas',
         stale: 'lapuk',
+        enterPrice: 'Masukkan harga',
+        disclaimer: 'Nota: Kadar penilaian Bank Rakyat mungkin berbeza daripada harga spot. Gunakan kadar bank untuk pengiraan tepat.',
         comingSoon: 'Akan datang',
         tabs: {
           calculator: 'Kalkulator',
@@ -149,6 +160,51 @@
             maximumFractionDigits: 2,
           })
         },
+        async fetchGoldPrice() {
+          try {
+            const fxRes = await fetch('https://api.frankfurter.app/latest?from=USD&to=MYR')
+            if (!fxRes.ok) throw new Error('FX API failed')
+            const fxData = await fxRes.json()
+            const usdToMyr = fxData.rates.MYR
+
+            let goldUsdPerOz = null
+            try {
+              const goldRes = await fetch('https://data-asg.goldprice.org/dbXRates/USD')
+              if (goldRes.ok) {
+                const goldData = await goldRes.json()
+                if (goldData.items && goldData.items[0]) {
+                  goldUsdPerOz = goldData.items[0].xauPrice
+                }
+              }
+            } catch (e) {
+              console.warn('Gold spot API failed:', e)
+            }
+
+            if (goldUsdPerOz && usdToMyr) {
+              const pricePerGram = (goldUsdPerOz * usdToMyr) / 31.1035
+              this.goldPrice = parseFloat(pricePerGram.toFixed(2))
+              this.goldPriceUpdated = new Date().toLocaleString('en-MY')
+              this.goldPriceStale = false
+              localStorage.setItem('arrahnu_goldPrice', JSON.stringify({
+                price: this.goldPrice,
+                updated: this.goldPriceUpdated
+              }))
+              return
+            }
+          } catch (e) {
+            console.warn('Gold price fetch failed:', e)
+          }
+          this.loadCachedGoldPrice()
+        },
+        loadCachedGoldPrice() {
+          const cached = localStorage.getItem('arrahnu_goldPrice')
+          if (cached) {
+            const data = JSON.parse(cached)
+            this.goldPrice = parseFloat(data.price)
+            this.goldPriceUpdated = data.updated
+            this.goldPriceStale = true
+          }
+        },
       },
       watch: {
         lang(val) {
@@ -167,6 +223,7 @@
         if (savedTab && this.tabs.some(t => t.id === savedTab)) {
           this.activeTab = savedTab
         }
+        this.fetchGoldPrice()
       },
     }).mount('#app')
   </script>
