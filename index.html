@@ -118,12 +118,18 @@
             </div>
             <div class="md:col-span-4">
               <div v-if="withdrawResult.financing > 0" class="bg-dark-800 rounded-lg p-3 border border-gold-500/20">
-                <p class="text-xs text-gray-400">{{ t.withdrawAmount }} (80%)</p>
+                <div class="flex items-center justify-between mb-1">
+                  <p class="text-xs text-gray-400">{{ t.withdrawAmount }}</p>
+                  <span class="text-xs bg-gold-500/20 text-gold-400 px-2 py-0.5 rounded-full font-medium">{{ t.mof }}: 80%</span>
+                </div>
                 <p class="text-2xl font-bold text-green-400">RM {{ formatNumber(withdrawResult.financing) }}</p>
                 <p class="text-xs text-gray-500">{{ t.marhunValue }}: RM {{ formatNumber(withdrawResult.marhunValue) }}</p>
               </div>
               <div v-else class="bg-dark-800 rounded-lg p-3 border border-dark-600">
-                <p class="text-xs text-gray-400">{{ t.withdrawAmount }}</p>
+                <div class="flex items-center justify-between mb-1">
+                  <p class="text-xs text-gray-400">{{ t.withdrawAmount }}</p>
+                  <span class="text-xs bg-dark-600 text-gray-400 px-2 py-0.5 rounded-full">{{ t.mof }}: 80%</span>
+                </div>
                 <p class="text-2xl font-bold text-gray-600">RM ---</p>
                 <p class="text-xs text-gray-500">{{ t.withdrawHint }}</p>
               </div>
@@ -211,14 +217,19 @@
         <!-- Results Card -->
         <div v-if="calc.weight && goldPrice" class="bg-dark-700 rounded-xl p-6 border border-dark-600">
           <h2 class="text-lg font-semibold text-gold-400 mb-4">{{ t.results }}</h2>
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
             <div class="bg-dark-800 rounded-lg p-4">
               <p class="text-xs text-gray-400">{{ t.marhunValue }}</p>
               <p class="text-lg font-bold text-gold-300">RM {{ formatNumber(calcMarhunValue) }}</p>
             </div>
             <div class="bg-dark-800 rounded-lg p-4">
-              <p class="text-xs text-gray-400">{{ t.financing }} ({{ calc.financingPct }}%)</p>
+              <p class="text-xs text-gray-400">{{ t.financing }}</p>
               <p class="text-lg font-bold text-green-400">RM {{ formatNumber(calcFinancing) }}</p>
+            </div>
+            <div class="bg-dark-800 rounded-lg p-4">
+              <p class="text-xs text-gray-400">{{ t.mof }}</p>
+              <p class="text-lg font-bold text-blue-400">{{ calc.financingPct }}%</p>
+              <p class="text-xs text-gray-500">{{ t.maxMof }}: 80%</p>
             </div>
             <div class="bg-dark-800 rounded-lg p-4">
               <p class="text-xs text-gray-400">{{ t.monthlyProfit }}</p>
@@ -511,6 +522,7 @@
               <div>
                 <p class="text-gray-500">{{ t.financing }}</p>
                 <p class="text-green-400 font-medium">RM {{ formatNumber(account.financingAmount || 0) }}</p>
+                <p class="text-xs text-gray-500">{{ t.mof }}: {{ getAccountMarhunValue(account) ? ((account.financingAmount || 0) / getAccountMarhunValue(account) * 100).toFixed(1) : 0 }}%</p>
               </div>
               <div>
                 <p class="text-gray-500">{{ t.monthlyProfit }}</p>
@@ -1046,6 +1058,8 @@
         cycle: 'Cycle',
         enterGoldPrice: 'Please enter or wait for gold price to load',
         // Withdrawable Amount
+        mof: 'Margin of Finance',
+        maxMof: 'Max',
         withdrawTitle: 'How Much Can You Withdraw?',
         withdrawDesc: 'Enter your gold details to see the maximum financing available at current gold price (80% margin).',
         withdrawAmount: 'Withdrawable Amount',
@@ -1213,6 +1227,8 @@
         cycle: 'Kitaran',
         enterGoldPrice: 'Sila masukkan atau tunggu harga emas dimuatkan',
         // Withdrawable Amount
+        mof: 'Margin Pembiayaan',
+        maxMof: 'Maks',
         withdrawTitle: 'Berapa Boleh Dikeluarkan?',
         withdrawDesc: 'Masukkan butiran emas untuk melihat pembiayaan maksimum pada harga emas semasa (80% margin).',
         withdrawAmount: 'Jumlah Boleh Dikeluarkan',
