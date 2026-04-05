@@ -194,8 +194,166 @@
           </div>
         </div>
       </div>
-      <div v-if="activeTab === 'tracker'" class="text-gray-300 text-center py-16">
-        {{ t.tabs.tracker }} &mdash; {{ t.comingSoon }}
+      <div v-if="activeTab === 'tracker'" class="space-y-6">
+        <!-- Dashboard -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+          <div class="bg-dark-700 rounded-xl p-4 border border-dark-600">
+            <p class="text-xs text-gray-400">{{ t.totalMarhun }}</p>
+            <p class="text-lg font-bold text-gold-300">RM {{ formatNumber(dashboardTotals.totalMarhun) }}</p>
+          </div>
+          <div class="bg-dark-700 rounded-xl p-4 border border-dark-600">
+            <p class="text-xs text-gray-400">{{ t.totalFinancing }}</p>
+            <p class="text-lg font-bold text-green-400">RM {{ formatNumber(dashboardTotals.totalFinancing) }}</p>
+          </div>
+          <div class="bg-dark-700 rounded-xl p-4 border border-dark-600">
+            <p class="text-xs text-gray-400">{{ t.totalMonthlyProfit }}</p>
+            <p class="text-lg font-bold text-red-400">RM {{ formatNumber(dashboardTotals.totalMonthlyProfit) }}</p>
+          </div>
+          <div class="bg-dark-700 rounded-xl p-4 border border-dark-600">
+            <p class="text-xs text-gray-400">{{ t.nextPayment }}</p>
+            <p class="text-lg font-bold" :class="dashboardTotals.nextDue && getDaysRemaining(dashboardTotals.nextDue) <= 30 ? 'text-red-400' : 'text-gray-300'">
+              {{ dashboardTotals.nextDue ? formatDate(dashboardTotals.nextDue) : '-' }}
+            </p>
+            <p v-if="dashboardTotals.nextDue" class="text-xs text-gray-500">{{ getDaysRemaining(dashboardTotals.nextDue) }} {{ t.daysLeft }}</p>
+          </div>
+          <div class="bg-dark-700 rounded-xl p-4 border border-dark-600">
+            <p class="text-xs text-gray-400">{{ t.activeAccounts }}</p>
+            <p class="text-lg font-bold text-gold-400">{{ dashboardTotals.count }}</p>
+          </div>
+        </div>
+
+        <div class="flex justify-end">
+          <button @click="openNewAccountForm" class="bg-gold-500 hover:bg-gold-600 text-dark-900 px-4 py-2 rounded-lg text-sm font-medium transition">+ {{ t.addAccount }}</button>
+        </div>
+
+        <div v-if="accounts.length" class="space-y-4">
+          <div v-for="account in accounts" :key="account.id" class="bg-dark-700 rounded-xl p-5 border border-dark-600 hover:border-gold-500/30 transition">
+            <div class="flex items-start justify-between mb-3">
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="font-semibold text-gray-100">{{ account.accountNo || t.noAccountNo }}</h3>
+                  <span :class="getStatusColor(account.status)" class="text-xs px-2 py-0.5 rounded-full font-medium">{{ getStatusLabel(account.status) }}</span>
+                </div>
+                <p v-if="account.branch" class="text-xs text-gray-500 mt-0.5">{{ account.branch }}</p>
+              </div>
+              <div class="flex gap-2">
+                <button @click="editAccount(account.id)" class="text-gray-400 hover:text-gold-400 text-sm transition">{{ t.edit }}</button>
+                <button @click="deleteAccount(account.id)" class="text-gray-400 hover:text-red-400 text-sm transition">{{ t.delete }}</button>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+              <div>
+                <p class="text-gray-500">{{ t.marhunValue }}</p>
+                <p class="text-gold-300 font-medium">RM {{ formatNumber(getAccountMarhunValue(account)) }}</p>
+                <p class="text-xs text-gray-500">{{ getAccountTotalWeight(account).toFixed(2) }}gm</p>
+              </div>
+              <div>
+                <p class="text-gray-500">{{ t.financing }}</p>
+                <p class="text-green-400 font-medium">RM {{ formatNumber(account.financingAmount || 0) }}</p>
+              </div>
+              <div>
+                <p class="text-gray-500">{{ t.monthlyProfit }}</p>
+                <p class="text-red-400 font-medium">RM {{ formatNumber(getAccountMonthlyProfit(account)) }}</p>
+              </div>
+              <div>
+                <p class="text-gray-500">{{ t.nextPayment }}</p>
+                <template v-if="getNextPaymentDue(account)">
+                  <p class="font-medium" :class="getDaysRemaining(getNextPaymentDue(account).dueDate) <= 30 ? 'text-red-400' : 'text-gray-300'">{{ formatDate(getNextPaymentDue(account).dueDate) }}</p>
+                  <p class="text-xs text-gray-500">{{ getDaysRemaining(getNextPaymentDue(account).dueDate) }} {{ t.daysLeft }}</p>
+                </template>
+                <p v-else class="text-gray-500">-</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div v-else class="text-center py-12 text-gray-500">
+          <p class="text-lg">{{ t.noAccounts }}</p>
+          <p class="text-sm mt-1">{{ t.addAccountHint }}</p>
+        </div>
+
+        <!-- Account Form Modal -->
+        <div v-if="showAccountForm" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <div class="bg-dark-700 rounded-xl border border-dark-600 w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6">
+            <div class="flex justify-between items-center mb-4">
+              <h2 class="text-lg font-semibold text-gold-400">{{ editingAccountId ? t.editAccount : t.addAccount }}</h2>
+              <button @click="showAccountForm = false" class="text-gray-400 hover:text-gray-200 text-xl">&times;</button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label class="block text-sm text-gray-400 mb-1">{{ t.accountNo }} *</label>
+                <input type="text" v-model="newAccount.accountNo" class="w-full bg-dark-800 border border-dark-600 rounded-lg px-3 py-2 text-gray-100 focus:border-gold-500 focus:outline-none">
+              </div>
+              <div>
+                <label class="block text-sm text-gray-400 mb-1">{{ t.financingAccountNo }}</label>
+                <input type="text" v-model="newAccount.financingAccountNo" class="w-full bg-dark-800 border border-dark-600 rounded-lg px-3 py-2 text-gray-100 focus:border-gold-500 focus:outline-none">
+              </div>
+              <div>
+                <label class="block text-sm text-gray-400 mb-1">{{ t.branch }}</label>
+                <input type="text" v-model="newAccount.branch" class="w-full bg-dark-800 border border-dark-600 rounded-lg px-3 py-2 text-gray-100 focus:border-gold-500 focus:outline-none">
+              </div>
+              <div>
+                <label class="block text-sm text-gray-400 mb-1">{{ t.status }}</label>
+                <select v-model="newAccount.status" class="w-full bg-dark-800 border border-dark-600 rounded-lg px-3 py-2 text-gray-100 focus:border-gold-500 focus:outline-none">
+                  <option value="active">{{ getStatusLabel('active') }}</option>
+                  <option value="matured">{{ getStatusLabel('matured') }}</option>
+                  <option value="redeemed">{{ getStatusLabel('redeemed') }}</option>
+                  <option value="rolled_over">{{ getStatusLabel('rolled_over') }}</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm text-gray-400 mb-1">{{ t.createdDate }} *</label>
+                <input type="date" v-model="newAccount.createdDate" class="w-full bg-dark-800 border border-dark-600 rounded-lg px-3 py-2 text-gray-100 focus:border-gold-500 focus:outline-none">
+              </div>
+              <div>
+                <label class="block text-sm text-gray-400 mb-1">{{ t.maturityDate }} *</label>
+                <input type="date" v-model="newAccount.maturityDate" class="w-full bg-dark-800 border border-dark-600 rounded-lg px-3 py-2 text-gray-100 focus:border-gold-500 focus:outline-none">
+              </div>
+              <div>
+                <label class="block text-sm text-gray-400 mb-1">{{ t.financingAmount }} *</label>
+                <input type="number" v-model.number="newAccount.financingAmount" min="0" step="0.01" class="w-full bg-dark-800 border border-dark-600 rounded-lg px-3 py-2 text-gray-100 focus:border-gold-500 focus:outline-none">
+              </div>
+            </div>
+            <div class="mb-4">
+              <div class="flex justify-between items-center mb-2">
+                <h3 class="text-sm font-medium text-gold-300">{{ t.marhunItems }}</h3>
+                <button @click="addItem" class="text-gold-400 hover:text-gold-300 text-sm">+ {{ t.addItem }}</button>
+              </div>
+              <div v-for="(item, idx) in newAccount.items" :key="idx" class="grid grid-cols-12 gap-2 mb-2 items-end">
+                <div class="col-span-4">
+                  <label v-if="idx === 0" class="block text-xs text-gray-500 mb-1">{{ t.description }}</label>
+                  <input type="text" v-model="item.description" class="w-full bg-dark-800 border border-dark-600 rounded px-2 py-1.5 text-sm text-gray-100 focus:border-gold-500 focus:outline-none" :placeholder="t.itemDesc">
+                </div>
+                <div class="col-span-2">
+                  <label v-if="idx === 0" class="block text-xs text-gray-500 mb-1">{{ t.karat }}</label>
+                  <select v-model.number="item.karat" class="w-full bg-dark-800 border border-dark-600 rounded px-2 py-1.5 text-sm text-gray-100 focus:border-gold-500 focus:outline-none">
+                    <option v-for="k in karats" :value="k.value">{{ k.label }}</option>
+                  </select>
+                </div>
+                <div class="col-span-2">
+                  <label v-if="idx === 0" class="block text-xs text-gray-500 mb-1">{{ t.weight }} (gm)</label>
+                  <input type="number" v-model.number="item.weightGm" min="0" step="0.01" class="w-full bg-dark-800 border border-dark-600 rounded px-2 py-1.5 text-sm text-gray-100 focus:border-gold-500 focus:outline-none">
+                </div>
+                <div class="col-span-3">
+                  <label v-if="idx === 0" class="block text-xs text-gray-500 mb-1">{{ t.value }} (RM)</label>
+                  <input type="number" v-model.number="item.valueMYR" min="0" step="0.01" class="w-full bg-dark-800 border border-dark-600 rounded px-2 py-1.5 text-sm text-gray-100 focus:border-gold-500 focus:outline-none">
+                </div>
+                <div class="col-span-1">
+                  <button v-if="newAccount.items.length > 1" @click="removeItem(idx)" class="text-red-400 hover:text-red-300 text-sm p-1">&times;</button>
+                </div>
+              </div>
+              <div class="text-sm text-gray-400 mt-2">{{ t.totalMarhun }}: <span class="text-gold-400 font-medium">RM {{ formatNumber(getFormMarhunValue()) }}</span></div>
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm text-gray-400 mb-1">{{ t.notes }}</label>
+              <textarea v-model="newAccount.notes" rows="2" class="w-full bg-dark-800 border border-dark-600 rounded-lg px-3 py-2 text-gray-100 focus:border-gold-500 focus:outline-none text-sm"></textarea>
+            </div>
+            <div class="flex justify-end gap-3">
+              <button @click="showAccountForm = false" class="px-4 py-2 text-sm text-gray-400 hover:text-gray-200 transition">{{ t.cancel }}</button>
+              <button @click="saveAccount" class="bg-gold-500 hover:bg-gold-600 text-dark-900 px-6 py-2 rounded-lg text-sm font-medium transition">{{ t.save }}</button>
+            </div>
+          </div>
+        </div>
       </div>
       <div v-if="activeTab === 'simulator'" class="text-gray-300 text-center py-16">
         {{ t.tabs.simulator }} &mdash; {{ t.comingSoon }}
@@ -238,6 +396,44 @@
         monthly: 'Monthly',
         totalFor: 'Total for',
         profit: 'Profit',
+        totalMarhun: 'Total Marhun',
+        totalFinancing: 'Total Financing',
+        totalMonthlyProfit: 'Monthly Profit',
+        nextPayment: 'Next Payment',
+        daysLeft: 'days left',
+        activeAccounts: 'Active Accounts',
+        addAccount: 'Add Account',
+        editAccount: 'Edit Account',
+        noAccountNo: 'No Account #',
+        edit: 'Edit',
+        delete: 'Delete',
+        noAccounts: 'No accounts yet',
+        addAccountHint: 'Add your first Ar-Rahnu account to start tracking',
+        accountNo: 'Account No',
+        financingAccountNo: 'Financing Account No',
+        branch: 'Branch',
+        status: 'Status',
+        createdDate: 'Start Date',
+        maturityDate: 'Maturity Date',
+        financingAmount: 'Financing Amount',
+        marhunItems: 'Marhun Items',
+        addItem: 'Add Item',
+        description: 'Description',
+        itemDesc: 'e.g. Gold wafer',
+        value: 'Value',
+        notes: 'Notes',
+        cancel: 'Cancel',
+        save: 'Save',
+        confirmDelete: 'Delete this account?',
+        errAccountNo: 'Account number is required',
+        errCreatedDate: 'Start date is required',
+        errMaturityDate: 'Maturity date is required',
+        errDateOrder: 'Maturity date must be after start date',
+        errItems: 'At least one marhun item is required',
+        errItemWeight: 'Item weight must be greater than 0',
+        errItemValue: 'Item value must be greater than 0',
+        errFinancingMax: 'Financing cannot exceed 80% of marhun value',
+        errFinancingRequired: 'Financing amount is required and must be greater than 0',
       },
       bm: {
         goldPrice: 'Harga Emas',
@@ -269,6 +465,44 @@
         monthly: 'Bulanan',
         totalFor: 'Jumlah untuk',
         profit: 'Keuntungan',
+        totalMarhun: 'Jumlah Marhun',
+        totalFinancing: 'Jumlah Pembiayaan',
+        totalMonthlyProfit: 'Keuntungan Bulanan',
+        nextPayment: 'Bayaran Seterusnya',
+        daysLeft: 'hari lagi',
+        activeAccounts: 'Akaun Aktif',
+        addAccount: 'Tambah Akaun',
+        editAccount: 'Edit Akaun',
+        noAccountNo: 'Tiada No. Akaun',
+        edit: 'Edit',
+        delete: 'Padam',
+        noAccounts: 'Tiada akaun lagi',
+        addAccountHint: 'Tambah akaun Ar-Rahnu pertama anda',
+        accountNo: 'No Akaun',
+        financingAccountNo: 'No Akaun Pembiayaan',
+        branch: 'Cawangan',
+        status: 'Status',
+        createdDate: 'Tarikh Mula',
+        maturityDate: 'Tarikh Matang',
+        financingAmount: 'Jumlah Pembiayaan',
+        marhunItems: 'Item Marhun',
+        addItem: 'Tambah Item',
+        description: 'Keterangan',
+        itemDesc: 'cth. Wafer emas',
+        value: 'Nilai',
+        notes: 'Nota',
+        cancel: 'Batal',
+        save: 'Simpan',
+        confirmDelete: 'Padam akaun ini?',
+        errAccountNo: 'No akaun diperlukan',
+        errCreatedDate: 'Tarikh mula diperlukan',
+        errMaturityDate: 'Tarikh matang diperlukan',
+        errDateOrder: 'Tarikh matang mesti selepas tarikh mula',
+        errItems: 'Sekurang-kurangnya satu item marhun diperlukan',
+        errItemWeight: 'Berat item mesti lebih daripada 0',
+        errItemValue: 'Nilai item mesti lebih daripada 0',
+        errFinancingMax: 'Pembiayaan tidak boleh melebihi 80% nilai marhun',
+        errFinancingRequired: 'Jumlah pembiayaan diperlukan dan mesti lebih daripada 0',
       },
     }
 
@@ -301,6 +535,23 @@
             { value: 16, label: '16K', purity: 0.667 }
           ],
           tenureOptions: [6, 12, 18],
+          // Tracker
+          accounts: [],
+          showAccountForm: false,
+          editingAccountId: null,
+          newAccount: {
+            accountNo: '',
+            financingAccountNo: '',
+            branch: '',
+            status: 'active',
+            createdDate: '',
+            maturityDate: '',
+            items: [{ description: '', karat: 24, weightGm: null, valueMYR: null }],
+            financingAmount: null,
+            rolloverFrom: null,
+            rolloverTo: null,
+            notes: ''
+          },
         }
       },
       computed: {
@@ -345,6 +596,21 @@
           if (!this.calcFinancing) return 0
           return (this.calcTotalProfit / this.calcFinancing) * (12 / this.calc.tenure) * 100
         },
+        activeAccounts() {
+          return this.accounts.filter(a => a.status === 'active')
+        },
+        dashboardTotals() {
+          const active = this.activeAccounts
+          const totalMarhun = active.reduce((sum, a) => sum + this.getAccountMarhunValue(a), 0)
+          const totalFinancing = active.reduce((sum, a) => sum + (a.financingAmount || 0), 0)
+          const totalMonthlyProfit = active.reduce((sum, a) => sum + this.getAccountMonthlyProfit(a), 0)
+          const nextDue = active
+            .flatMap(a => (a.paymentSchedule || []).filter(p => !p.paid))
+            .map(p => p.dueDate)
+            .filter(Boolean)
+            .sort()
+          return { totalMarhun, totalFinancing, totalMonthlyProfit, nextDue: nextDue[0] || null, count: active.length }
+        },
       },
       methods: {
         toggleLang() {
@@ -355,6 +621,119 @@
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
           })
+        },
+        // Tracker helpers
+        getProfitRate(marhunValue) {
+          if (marhunValue < 500) return 0.60
+          if (marhunValue < 5000) return 0.75
+          if (marhunValue < 10000) return 0.80
+          return 0.85
+        },
+        getAccountMarhunValue(account) {
+          return (account.items || []).reduce((sum, item) => sum + (item.valueMYR || 0), 0)
+        },
+        getAccountMonthlyProfit(account) {
+          const marhunValue = this.getAccountMarhunValue(account)
+          return marhunValue / 100 * this.getProfitRate(marhunValue)
+        },
+        getAccountTotalWeight(account) {
+          return (account.items || []).reduce((sum, item) => sum + (item.weightGm || 0), 0)
+        },
+        getDaysRemaining(dateStr) {
+          if (!dateStr) return null
+          return Math.ceil((new Date(dateStr) - new Date()) / (1000 * 60 * 60 * 24))
+        },
+        getNextPaymentDue(account) {
+          return (account.paymentSchedule || []).filter(p => !p.paid).sort((a, b) => a.dueDate.localeCompare(b.dueDate))[0] || null
+        },
+        formatDate(dateStr) {
+          if (!dateStr) return '-'
+          return new Date(dateStr).toLocaleDateString('en-MY', { day: '2-digit', month: '2-digit', year: 'numeric' })
+        },
+        getStatusColor(status) {
+          const colors = { active: 'text-green-400 bg-green-400/10', matured: 'text-yellow-400 bg-yellow-400/10', redeemed: 'text-blue-400 bg-blue-400/10', rolled_over: 'text-purple-400 bg-purple-400/10' }
+          return colors[status] || 'text-gray-400 bg-gray-400/10'
+        },
+        getStatusLabel(status) {
+          const labels = {
+            en: { active: 'Active', matured: 'Matured', redeemed: 'Redeemed', rolled_over: 'Rolled Over' },
+            bm: { active: 'Aktif', matured: 'Matang', redeemed: 'Ditebus', rolled_over: 'Digadai Semula' }
+          }
+          return labels[this.lang][status] || status
+        },
+        // Account CRUD
+        openNewAccountForm() {
+          this.editingAccountId = null
+          this.newAccount = { accountNo: '', financingAccountNo: '', branch: '', status: 'active', createdDate: '', maturityDate: '', items: [{ description: '', karat: 24, weightGm: null, valueMYR: null }], financingAmount: null, rolloverFrom: null, rolloverTo: null, notes: '' }
+          this.showAccountForm = true
+        },
+        editAccount(id) {
+          const account = this.accounts.find(a => a.id === id)
+          if (!account) return
+          this.editingAccountId = id
+          this.newAccount = JSON.parse(JSON.stringify(account))
+          this.showAccountForm = true
+        },
+        addItem() {
+          this.newAccount.items.push({ description: '', karat: 24, weightGm: null, valueMYR: null })
+        },
+        removeItem(index) {
+          if (this.newAccount.items.length > 1) this.newAccount.items.splice(index, 1)
+        },
+        getFormMarhunValue() {
+          return this.newAccount.items.reduce((sum, item) => sum + (item.valueMYR || 0), 0)
+        },
+        generatePaymentSchedule(createdDate, marhunValue) {
+          if (!createdDate) return []
+          const rate = this.getProfitRate(marhunValue)
+          const cycleProfit = marhunValue / 100 * rate * 6
+          const schedule = []
+          const start = new Date(createdDate)
+          for (let i = 1; i <= 3; i++) {
+            const due = new Date(start)
+            due.setMonth(due.getMonth() + (i * 6))
+            schedule.push({ cycle: i, dueDate: due.toISOString().split('T')[0], amount: parseFloat(cycleProfit.toFixed(2)), paid: false })
+          }
+          return schedule
+        },
+        validateAccount() {
+          const a = this.newAccount
+          const errors = []
+          if (!a.accountNo.trim()) errors.push(this.t.errAccountNo)
+          if (!a.createdDate) errors.push(this.t.errCreatedDate)
+          if (!a.maturityDate) errors.push(this.t.errMaturityDate)
+          if (a.createdDate && a.maturityDate && a.maturityDate <= a.createdDate) errors.push(this.t.errDateOrder)
+          if (!a.items.length || a.items.every(i => !i.description)) errors.push(this.t.errItems)
+          for (const item of a.items) {
+            if (item.description && (!item.weightGm || item.weightGm <= 0)) errors.push(this.t.errItemWeight)
+            if (item.description && (!item.valueMYR || item.valueMYR <= 0)) errors.push(this.t.errItemValue)
+          }
+          if (!a.financingAmount || a.financingAmount <= 0) errors.push(this.t.errFinancingRequired)
+          const marhunValue = this.getFormMarhunValue()
+          if (a.financingAmount && a.financingAmount > marhunValue * 0.8) errors.push(this.t.errFinancingMax)
+          return [...new Set(errors)]
+        },
+        saveAccount() {
+          const errors = this.validateAccount()
+          if (errors.length) { alert(errors.join('\n')); return }
+          const marhunValue = this.getFormMarhunValue()
+          const accountData = { ...this.newAccount, id: this.editingAccountId || crypto.randomUUID(), paymentSchedule: this.generatePaymentSchedule(this.newAccount.createdDate, marhunValue) }
+          if (this.editingAccountId) {
+            const idx = this.accounts.findIndex(a => a.id === this.editingAccountId)
+            if (idx !== -1) this.accounts.splice(idx, 1, accountData)
+          } else {
+            this.accounts.push(accountData)
+          }
+          this.showAccountForm = false
+        },
+        deleteAccount(id) {
+          if (confirm(this.t.confirmDelete)) { this.accounts = this.accounts.filter(a => a.id !== id) }
+        },
+        togglePayment(accountId, cycle) {
+          const account = this.accounts.find(a => a.id === accountId)
+          if (!account) return
+          const payment = account.paymentSchedule.find(p => p.cycle === cycle)
+          if (payment) payment.paid = !payment.paid
         },
         async fetchGoldPrice() {
           try {
@@ -409,6 +788,10 @@
         activeTab(val) {
           localStorage.setItem('arrahnu-tab', val)
         },
+        accounts: {
+          handler(val) { localStorage.setItem('arrahnu_accounts', JSON.stringify(val)) },
+          deep: true
+        },
       },
       mounted() {
         const savedLang = localStorage.getItem('arrahnu-lang')
@@ -419,6 +802,8 @@
         if (savedTab && this.tabs.some(t => t.id === savedTab)) {
           this.activeTab = savedTab
         }
+        const savedAccounts = localStorage.getItem('arrahnu_accounts')
+        if (savedAccounts) this.accounts = JSON.parse(savedAccounts)
         this.fetchGoldPrice()
       },
     }).mount('#app')
