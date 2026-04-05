@@ -87,8 +87,112 @@
 
     <!-- Content -->
     <main class="max-w-6xl mx-auto p-6">
-      <div v-if="activeTab === 'calculator'" class="text-gray-300 text-center py-16">
-        {{ t.tabs.calculator }} &mdash; {{ t.comingSoon }}
+      <div v-if="activeTab === 'calculator'" class="space-y-6">
+        <!-- Input Card -->
+        <div class="bg-dark-700 rounded-xl p-6 border border-dark-600">
+          <h2 class="text-lg font-semibold text-gold-400 mb-4">{{ t.calcTitle }}</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <label class="block text-sm text-gray-400 mb-1">{{ t.weight }} (gm)</label>
+              <input type="number" v-model.number="calc.weight" min="0" step="0.01"
+                class="w-full bg-dark-800 border border-dark-600 rounded-lg px-3 py-2 text-gray-100 focus:border-gold-500 focus:outline-none" placeholder="0.00">
+            </div>
+            <div>
+              <label class="block text-sm text-gray-400 mb-1">{{ t.karat }}</label>
+              <select v-model.number="calc.karat"
+                class="w-full bg-dark-800 border border-dark-600 rounded-lg px-3 py-2 text-gray-100 focus:border-gold-500 focus:outline-none">
+                <option v-for="k in karats" :value="k.value">{{ k.label }} ({{ (k.purity * 100).toFixed(1) }}%)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm text-gray-400 mb-1">{{ t.goldPrice }} (RM/gm)</label>
+              <input type="number" v-model.number="goldPrice" min="0" step="0.01"
+                class="w-full bg-dark-800 border border-dark-600 rounded-lg px-3 py-2 text-gray-100 focus:border-gold-500 focus:outline-none" placeholder="0.00">
+            </div>
+            <div>
+              <label class="block text-sm text-gray-400 mb-1">{{ t.financingPct }}: {{ calc.financingPct }}%</label>
+              <input type="range" v-model.number="calc.financingPct" min="50" max="80" step="1"
+                class="w-full accent-gold-500">
+            </div>
+          </div>
+          <div class="mt-4">
+            <label class="block text-sm text-gray-400 mb-2">{{ t.tenure }}</label>
+            <div class="flex gap-2">
+              <button v-for="m in tenureOptions" :key="m" @click="calc.tenure = m"
+                :class="calc.tenure === m ? 'bg-gold-500 text-dark-900' : 'bg-dark-600 text-gray-300 hover:bg-dark-500'"
+                class="px-4 py-1.5 rounded-lg text-sm font-medium transition">
+                {{ m }} {{ t.months }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Results Card -->
+        <div v-if="calc.weight && goldPrice" class="bg-dark-700 rounded-xl p-6 border border-dark-600">
+          <h2 class="text-lg font-semibold text-gold-400 mb-4">{{ t.results }}</h2>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-dark-800 rounded-lg p-4">
+              <p class="text-xs text-gray-400">{{ t.marhunValue }}</p>
+              <p class="text-lg font-bold text-gold-300">RM {{ formatNumber(calcMarhunValue) }}</p>
+            </div>
+            <div class="bg-dark-800 rounded-lg p-4">
+              <p class="text-xs text-gray-400">{{ t.financing }} ({{ calc.financingPct }}%)</p>
+              <p class="text-lg font-bold text-green-400">RM {{ formatNumber(calcFinancing) }}</p>
+            </div>
+            <div class="bg-dark-800 rounded-lg p-4">
+              <p class="text-xs text-gray-400">{{ t.monthlyProfit }}</p>
+              <p class="text-lg font-bold text-red-400">RM {{ formatNumber(calcMonthlyProfit) }}</p>
+            </div>
+            <div class="bg-dark-800 rounded-lg p-4">
+              <p class="text-xs text-gray-400">{{ t.annualizedRate }}</p>
+              <p class="text-lg font-bold text-yellow-400">{{ calcAnnualizedRate.toFixed(1) }}%</p>
+            </div>
+          </div>
+          <div class="mb-4 text-sm">
+            <span class="text-gray-400">{{ t.profitRateTier }}:</span>
+            <span class="text-gold-400 font-medium ml-2">{{ calcProfitRateTier }} — RM{{ calcProfitRate.toFixed(2) }}/RM100/{{ t.month }}</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="text-gray-400 border-b border-dark-600">
+                  <th class="text-left py-2">{{ t.period }}</th>
+                  <th class="text-right py-2">{{ t.profitCost }}</th>
+                  <th class="text-right py-2">{{ t.totalRepayment }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="border-b border-dark-600/50">
+                  <td class="py-2">{{ t.monthly }}</td>
+                  <td class="text-right text-red-400">RM {{ formatNumber(calcMonthlyProfit) }}</td>
+                  <td class="text-right">-</td>
+                </tr>
+                <tr class="border-b border-dark-600/50">
+                  <td class="py-2">6 {{ t.months }}</td>
+                  <td class="text-right text-red-400">RM {{ formatNumber(calcMonthlyProfit * 6) }}</td>
+                  <td class="text-right text-gray-300">RM {{ formatNumber(calcFinancing + calcMonthlyProfit * 6) }}</td>
+                </tr>
+                <tr class="border-b border-dark-600/50">
+                  <td class="py-2">12 {{ t.months }}</td>
+                  <td class="text-right text-red-400">RM {{ formatNumber(calcMonthlyProfit * 12) }}</td>
+                  <td class="text-right text-gray-300">RM {{ formatNumber(calcFinancing + calcMonthlyProfit * 12) }}</td>
+                </tr>
+                <tr class="font-semibold" :class="calc.tenure === 18 ? 'text-gold-400' : ''">
+                  <td class="py-2">18 {{ t.months }}</td>
+                  <td class="text-right text-red-400">RM {{ formatNumber(calcMonthlyProfit * 18) }}</td>
+                  <td class="text-right">RM {{ formatNumber(calcFinancing + calcMonthlyProfit * 18) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="mt-4 bg-gold-500/10 border border-gold-500/30 rounded-lg p-4">
+            <div class="flex justify-between items-center">
+              <span class="text-gold-300 font-medium">{{ t.totalFor }} {{ calc.tenure }} {{ t.months }}</span>
+              <span class="text-xl font-bold text-gold-400">RM {{ formatNumber(calcTotalRepayment) }}</span>
+            </div>
+            <p class="text-xs text-gray-400 mt-1">{{ t.financing }}: RM {{ formatNumber(calcFinancing) }} + {{ t.profit }}: RM {{ formatNumber(calcTotalProfit) }}</p>
+          </div>
+        </div>
       </div>
       <div v-if="activeTab === 'tracker'" class="text-gray-300 text-center py-16">
         {{ t.tabs.tracker }} &mdash; {{ t.comingSoon }}
@@ -115,6 +219,25 @@
           tracker: 'Tracker',
           simulator: 'Simulator',
         },
+        calcTitle: 'Ar-Rahnu Calculator',
+        weight: 'Gold Weight',
+        karat: 'Karat',
+        financingPct: 'Financing',
+        tenure: 'Tenure',
+        months: 'months',
+        month: 'month',
+        results: 'Results',
+        marhunValue: 'Marhun Value',
+        financing: 'Financing',
+        monthlyProfit: 'Monthly Profit',
+        annualizedRate: 'Annualized Rate',
+        profitRateTier: 'Profit Rate Tier',
+        period: 'Period',
+        profitCost: 'Profit Cost',
+        totalRepayment: 'Total Repayment',
+        monthly: 'Monthly',
+        totalFor: 'Total for',
+        profit: 'Profit',
       },
       bm: {
         goldPrice: 'Harga Emas',
@@ -127,6 +250,25 @@
           tracker: 'Penjejak',
           simulator: 'Simulasi',
         },
+        calcTitle: 'Kalkulator Ar-Rahnu',
+        weight: 'Berat Emas',
+        karat: 'Karat',
+        financingPct: 'Pembiayaan',
+        tenure: 'Tempoh',
+        months: 'bulan',
+        month: 'bulan',
+        results: 'Keputusan',
+        marhunValue: 'Nilai Marhun',
+        financing: 'Pembiayaan',
+        monthlyProfit: 'Keuntungan Bulanan',
+        annualizedRate: 'Kadar Tahunan',
+        profitRateTier: 'Tier Kadar Keuntungan',
+        period: 'Tempoh',
+        profitCost: 'Kos Keuntungan',
+        totalRepayment: 'Jumlah Bayaran',
+        monthly: 'Bulanan',
+        totalFor: 'Jumlah untuk',
+        profit: 'Keuntungan',
       },
     }
 
@@ -143,11 +285,65 @@
             { id: 'tracker' },
             { id: 'simulator' },
           ],
+          // Calculator
+          calc: {
+            weight: null,
+            karat: 24,
+            financingPct: 80,
+            tenure: 18
+          },
+          karats: [
+            { value: 24, label: '24K', purity: 1.000 },
+            { value: 22, label: '22K', purity: 0.916 },
+            { value: 21, label: '21K', purity: 0.875 },
+            { value: 20, label: '20K', purity: 0.833 },
+            { value: 18, label: '18K', purity: 0.750 },
+            { value: 16, label: '16K', purity: 0.667 }
+          ],
+          tenureOptions: [6, 12, 18],
         }
       },
       computed: {
         t() {
           return i18n[this.lang]
+        },
+        calcPurity() {
+          const k = this.karats.find(k => k.value === this.calc.karat)
+          return k ? k.purity : 1
+        },
+        calcMarhunValue() {
+          if (!this.calc.weight || !this.goldPrice) return 0
+          return this.calc.weight * this.goldPrice * this.calcPurity
+        },
+        calcFinancing() {
+          return this.calcMarhunValue * (this.calc.financingPct / 100)
+        },
+        calcProfitRate() {
+          const v = this.calcMarhunValue
+          if (v < 500) return 0.60
+          if (v < 5000) return 0.75
+          if (v < 10000) return 0.80
+          return 0.85
+        },
+        calcProfitRateTier() {
+          const v = this.calcMarhunValue
+          if (v < 500) return '< RM500'
+          if (v < 5000) return 'RM500 - RM5,000'
+          if (v < 10000) return 'RM5,000 - RM10,000'
+          return '> RM10,000'
+        },
+        calcMonthlyProfit() {
+          return this.calcMarhunValue / 100 * this.calcProfitRate
+        },
+        calcTotalProfit() {
+          return this.calcMonthlyProfit * this.calc.tenure
+        },
+        calcTotalRepayment() {
+          return this.calcFinancing + this.calcTotalProfit
+        },
+        calcAnnualizedRate() {
+          if (!this.calcFinancing) return 0
+          return (this.calcTotalProfit / this.calcFinancing) * (12 / this.calc.tenure) * 100
         },
       },
       methods: {
