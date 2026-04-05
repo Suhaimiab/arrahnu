@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ar-Rahnu Pro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            gold: {
+              50: '#fdf8e8',
+              100: '#faf0c8',
+              200: '#f5e08e',
+              300: '#eecb4d',
+              400: '#e4b422',
+              500: '#d4a843',
+              600: '#a67c1a',
+              700: '#7a5c15',
+              800: '#4e3b10',
+              900: '#2a200a',
+            },
+            dark: {
+              50: '#e8e8ee',
+              100: '#c4c4d4',
+              200: '#9d9db7',
+              300: '#76769a',
+              400: '#585885',
+              500: '#3a3a70',
+              600: '#2d2d5e',
+              700: '#22224a',
+              800: '#1a1a2e',
+              900: '#0f0f1a',
+            },
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    body { background-color: #1a1a2e; }
+    [v-cloak] { display: none; }
+  </style>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+  <div id="app" v-cloak>
+
+    <!-- Header -->
+    <header class="bg-dark-700 border-b border-gold-500/30 px-4 py-3">
+      <div class="max-w-6xl mx-auto flex items-center justify-between flex-wrap gap-2">
+        <h1 class="text-xl font-bold text-gold-400">Ar-Rahnu Pro</h1>
+        <div class="flex items-center gap-4">
+          <div class="flex items-center gap-2 bg-dark-800 rounded-lg px-3 py-1.5 text-sm">
+            <span class="text-gold-300">{{ t.goldPrice }}:</span>
+            <span v-if="goldPrice" class="font-semibold text-gold-400">RM {{ formatNumber(goldPrice) }}/gm</span>
+            <span v-else class="text-gray-500">---</span>
+            <span v-if="goldPriceUpdated" class="text-xs text-gray-500">({{ goldPriceUpdated }})</span>
+            <span v-if="goldPriceStale" class="text-xs text-yellow-500">{{ t.stale }}</span>
+          </div>
+          <button @click="toggleLang" class="bg-dark-600 hover:bg-dark-500 text-gold-300 px-3 py-1.5 rounded-lg text-sm font-medium transition">
+            {{ lang === 'en' ? 'BM' : 'EN' }}
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Tab Navigation -->
+    <nav class="bg-dark-700/50 border-b border-dark-600">
+      <div class="max-w-6xl mx-auto flex">
+        <button v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id"
+          :class="activeTab === tab.id ? 'border-gold-500 text-gold-400 bg-dark-800/50' : 'border-transparent text-gray-400 hover:text-gray-200'"
+          class="px-6 py-3 text-sm font-medium border-b-2 transition">
+          {{ t.tabs[tab.id] }}
+        </button>
+      </div>
+    </nav>
+
+    <!-- Content -->
+    <main class="max-w-6xl mx-auto p-6">
+      <div v-if="activeTab === 'calculator'" class="text-gray-300 text-center py-16">
+        {{ t.tabs.calculator }} &mdash; {{ t.comingSoon }}
+      </div>
+      <div v-if="activeTab === 'tracker'" class="text-gray-300 text-center py-16">
+        {{ t.tabs.tracker }} &mdash; {{ t.comingSoon }}
+      </div>
+      <div v-if="activeTab === 'simulator'" class="text-gray-300 text-center py-16">
+        {{ t.tabs.simulator }} &mdash; {{ t.comingSoon }}
+      </div>
+    </main>
+
+  </div>
+
+  <script>
+    const { createApp } = Vue
+
+    const i18n = {
+      en: {
+        goldPrice: 'Gold Price',
+        stale: 'stale',
+        comingSoon: 'Coming soon',
+        tabs: {
+          calculator: 'Calculator',
+          tracker: 'Tracker',
+          simulator: 'Simulator',
+        },
+      },
+      bm: {
+        goldPrice: 'Harga Emas',
+        stale: 'lapuk',
+        comingSoon: 'Akan datang',
+        tabs: {
+          calculator: 'Kalkulator',
+          tracker: 'Penjejak',
+          simulator: 'Simulasi',
+        },
+      },
+    }
+
+    createApp({
+      data() {
+        return {
+          activeTab: 'calculator',
+          lang: 'en',
+          goldPrice: null,
+          goldPriceUpdated: null,
+          goldPriceStale: false,
+          tabs: [
+            { id: 'calculator' },
+            { id: 'tracker' },
+            { id: 'simulator' },
+          ],
+        }
+      },
+      computed: {
+        t() {
+          return i18n[this.lang]
+        },
+      },
+      methods: {
+        toggleLang() {
+          this.lang = this.lang === 'en' ? 'bm' : 'en'
+        },
+        formatNumber(num) {
+          return Number(num).toLocaleString('en-MY', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })
+        },
+      },
+      watch: {
+        lang(val) {
+          localStorage.setItem('arrahnu-lang', val)
+        },
+        activeTab(val) {
+          localStorage.setItem('arrahnu-tab', val)
+        },
+      },
+      mounted() {
+        const savedLang = localStorage.getItem('arrahnu-lang')
+        if (savedLang && (savedLang === 'en' || savedLang === 'bm')) {
+          this.lang = savedLang
+        }
+        const savedTab = localStorage.getItem('arrahnu-tab')
+        if (savedTab && this.tabs.some(t => t.id === savedTab)) {
+          this.activeTab = savedTab
+        }
+      },
+    }).mount('#app')
+  </script>
+</body>
+</html>
