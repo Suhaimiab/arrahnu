@@ -42,10 +42,16 @@
   <style>
     body { background-color: #1a1a2e; }
     [v-cloak] { display: none; }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type="number"] { -moz-appearance: textfield; }
   </style>
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
-<body>
+<body class="min-h-screen text-gray-100">
   <div id="app" v-cloak>
 
     <!-- Header -->
@@ -125,6 +131,10 @@
               </button>
             </div>
           </div>
+        </div>
+
+        <div v-if="!goldPrice && calc.weight" class="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4 text-sm text-yellow-400">
+          {{ t.enterGoldPrice }}
         </div>
 
         <!-- Results Card -->
@@ -281,6 +291,18 @@
                   </span>
                   <span v-if="idx < getRolloverChain(account.id).length - 1" class="text-gray-600">&rarr;</span>
                 </template>
+              </div>
+            </div>
+            <!-- Payment Schedule -->
+            <div v-if="account.paymentSchedule && account.paymentSchedule.length" class="mt-3 pt-3 border-t border-dark-600">
+              <p class="text-xs text-gray-500 mb-2">{{ t.paymentSchedule }}</p>
+              <div class="flex gap-2 flex-wrap">
+                <button v-for="p in account.paymentSchedule" :key="p.cycle" @click="togglePayment(account.id, p.cycle)"
+                  :class="p.paid ? 'bg-green-500/20 text-green-400 border-green-500/50 line-through' : 'bg-dark-800 text-gray-300 border-dark-600'"
+                  class="border rounded px-3 py-1.5 text-xs transition">
+                  {{ t.cycle }} {{ p.cycle }}: RM {{ formatNumber(p.amount) }}
+                  <span class="text-gray-500 ml-1">{{ formatDate(p.dueDate) }}</span>
+                </button>
               </div>
             </div>
           </div>
@@ -637,6 +659,11 @@
       </div>
     </main>
 
+    <footer class="max-w-6xl mx-auto px-4 py-6 mt-8 border-t border-dark-600 text-center text-xs text-gray-600">
+      <p>Ar-Rahnu Pro v1.0 — {{ t.footerDesc }}</p>
+      <p class="mt-1">{{ t.footerDisclaimer }}</p>
+    </footer>
+
   </div>
 
   <script>
@@ -756,6 +783,11 @@
         profitFullTenure: 'Full Tenure Profit',
         youSave: 'You Save',
         netCost: 'Net Cost (Financing + Profit)',
+        footerDesc: 'Personal Ar-Rahnu Calculator, Tracker & Simulator',
+        footerDisclaimer: 'This tool is for personal reference only. Always verify with Bank Rakyat for official rates and calculations.',
+        paymentSchedule: 'Payment Schedule',
+        cycle: 'Cycle',
+        enterGoldPrice: 'Please enter or wait for gold price to load',
       },
       bm: {
         goldPrice: 'Harga Emas',
@@ -870,6 +902,11 @@
         profitFullTenure: 'Keuntungan Penuh',
         youSave: 'Anda Jimat',
         netCost: 'Kos Bersih (Pembiayaan + Keuntungan)',
+        footerDesc: 'Kalkulator, Penjejak & Simulasi Ar-Rahnu Peribadi',
+        footerDisclaimer: 'Alat ini untuk rujukan peribadi sahaja. Sentiasa sahkan dengan Bank Rakyat untuk kadar dan pengiraan rasmi.',
+        paymentSchedule: 'Jadual Pembayaran',
+        cycle: 'Kitaran',
+        enterGoldPrice: 'Sila masukkan atau tunggu harga emas dimuatkan',
       },
     }
 
