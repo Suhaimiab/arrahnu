@@ -1011,6 +1011,168 @@
 
         </div>
       </div>
+
+      <!-- Advice Tab -->
+      <div v-if="activeTab === 'advice'" class="space-y-6">
+
+        <!-- When Ar-Rahnu Makes Sense -->
+        <div class="bg-dark-700 rounded-xl p-6 border border-green-500/30">
+          <h2 class="text-lg font-semibold text-green-400 mb-4">{{ t.advWhenGoodTitle }}</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div v-for="(tip, idx) in t.advWhenGood" :key="idx" class="flex gap-3">
+              <span class="text-green-400 text-lg mt-0.5">&#10003;</span>
+              <div>
+                <p class="text-sm text-gray-200 font-medium">{{ tip.title }}</p>
+                <p class="text-xs text-gray-400 mt-0.5">{{ tip.desc }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- When Ar-Rahnu Doesn't Make Sense -->
+        <div class="bg-dark-700 rounded-xl p-6 border border-red-500/30">
+          <h2 class="text-lg font-semibold text-red-400 mb-4">{{ t.advWhenBadTitle }}</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div v-for="(tip, idx) in t.advWhenBad" :key="idx" class="flex gap-3">
+              <span class="text-red-400 text-lg mt-0.5">&#10007;</span>
+              <div>
+                <p class="text-sm text-gray-200 font-medium">{{ tip.title }}</p>
+                <p class="text-xs text-gray-400 mt-0.5">{{ tip.desc }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Do's -->
+        <div class="bg-dark-700 rounded-xl p-6 border border-dark-600">
+          <h2 class="text-lg font-semibold text-gold-400 mb-4">{{ t.advDoTitle }}</h2>
+          <div class="space-y-3">
+            <div v-for="(tip, idx) in t.advDo" :key="idx" class="flex gap-3 bg-dark-800 rounded-lg p-4">
+              <span class="text-green-400 font-bold text-sm mt-0.5">{{ idx + 1 }}</span>
+              <div>
+                <p class="text-sm text-gray-200 font-medium">{{ tip.title }}</p>
+                <p class="text-xs text-gray-400 mt-1">{{ tip.desc }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Don'ts -->
+        <div class="bg-dark-700 rounded-xl p-6 border border-dark-600">
+          <h2 class="text-lg font-semibold text-red-400 mb-4">{{ t.advDontTitle }}</h2>
+          <div class="space-y-3">
+            <div v-for="(tip, idx) in t.advDont" :key="idx" class="flex gap-3 bg-dark-800 rounded-lg p-4">
+              <span class="text-red-400 font-bold text-sm mt-0.5">{{ idx + 1 }}</span>
+              <div>
+                <p class="text-sm text-gray-200 font-medium">{{ tip.title }}</p>
+                <p class="text-xs text-gray-400 mt-1">{{ tip.desc }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cost Awareness -->
+        <div class="bg-dark-700 rounded-xl p-6 border border-gold-500/30">
+          <h2 class="text-lg font-semibold text-gold-400 mb-4">{{ t.advCostTitle }}</h2>
+          <div class="bg-dark-800 rounded-lg p-4 mb-4">
+            <p class="text-sm text-gray-300 mb-3">{{ t.advCostIntro }}</p>
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead>
+                  <tr class="text-gray-400 border-b border-dark-600">
+                    <th class="text-left py-2">{{ t.advCostScenario }}</th>
+                    <th class="text-right py-2">{{ t.advCostMonthly }}</th>
+                    <th class="text-right py-2">{{ t.advCost6m }}</th>
+                    <th class="text-right py-2">{{ t.advCost18m }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="border-b border-dark-600/50">
+                    <td class="py-2 text-gray-300">RM 50,000 {{ t.marhunValue }}</td>
+                    <td class="text-right text-red-400">RM 425</td>
+                    <td class="text-right text-red-400">RM 2,550</td>
+                    <td class="text-right text-red-400">RM 7,650</td>
+                  </tr>
+                  <tr class="border-b border-dark-600/50">
+                    <td class="py-2 text-gray-300">RM 100,000 {{ t.marhunValue }}</td>
+                    <td class="text-right text-red-400">RM 850</td>
+                    <td class="text-right text-red-400">RM 5,100</td>
+                    <td class="text-right text-red-400">RM 15,300</td>
+                  </tr>
+                  <tr class="border-b border-dark-600/50">
+                    <td class="py-2 text-gold-300">RM 141,428 {{ t.marhunValue }}</td>
+                    <td class="text-right text-red-400">RM 1,202</td>
+                    <td class="text-right text-red-400">RM 7,213</td>
+                    <td class="text-right text-red-400">RM 21,639</td>
+                  </tr>
+                  <tr>
+                    <td class="py-2 text-gray-300">RM 200,000 {{ t.marhunValue }}</td>
+                    <td class="text-right text-red-400">RM 1,700</td>
+                    <td class="text-right text-red-400">RM 10,200</td>
+                    <td class="text-right text-red-400">RM 30,600</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="text-xs text-gray-500 mt-2 italic">{{ t.advCostNote }}</p>
+          </div>
+        </div>
+
+        <!-- Rollover Trap -->
+        <div class="bg-dark-700 rounded-xl p-6 border border-red-500/20">
+          <h2 class="text-lg font-semibold text-red-400 mb-4">{{ t.advRolloverTitle }}</h2>
+          <p class="text-sm text-gray-300 mb-4">{{ t.advRolloverBody }}</p>
+          <div class="bg-dark-800 rounded-lg p-4 mb-4">
+            <p class="text-xs text-gray-400 mb-2">{{ t.advRolloverExample }}</p>
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between"><span class="text-gray-400">{{ t.start }}</span><span class="text-green-400">RM 105,127</span></div>
+              <div class="flex justify-between"><span class="text-gray-400">{{ t.rollover }} 1</span><span class="text-yellow-400">RM 107,170 <span class="text-xs text-gray-500">(+RM 2,043)</span></span></div>
+              <div class="flex justify-between"><span class="text-gray-400">{{ t.rollover }} 2</span><span class="text-yellow-400">RM 111,220 <span class="text-xs text-gray-500">(+RM 4,050)</span></span></div>
+              <div class="flex justify-between"><span class="text-gray-400">{{ t.rollover }} 3</span><span class="text-red-400">RM 113,140 <span class="text-xs text-gray-500">(+RM 1,920)</span></span></div>
+              <div class="flex justify-between border-t border-dark-600 pt-2"><span class="text-gray-300 font-medium">{{ t.totalGrowth }}</span><span class="text-red-400 font-bold">+RM 8,013 (7.6%)</span></div>
+            </div>
+          </div>
+          <p class="text-xs text-gray-400">{{ t.advRolloverTip }}</p>
+        </div>
+
+        <!-- Gold Price Risk -->
+        <div class="bg-dark-700 rounded-xl p-6 border border-dark-600">
+          <h2 class="text-lg font-semibold text-gold-400 mb-4">{{ t.advGoldRiskTitle }}</h2>
+          <p class="text-sm text-gray-300 mb-4">{{ t.advGoldRiskBody }}</p>
+          <div class="bg-dark-800 rounded-lg p-4">
+            <p class="text-xs text-gray-400 mb-2">{{ t.advGoldRiskExample }}</p>
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between"><span class="text-gray-400">{{ t.advGoldCurrent }}</span><span class="text-gold-300">RM 141,428</span></div>
+              <div class="flex justify-between"><span class="text-gray-400">{{ t.advGoldDrop10 }}</span><span class="text-yellow-400">RM 127,285</span></div>
+              <div class="flex justify-between"><span class="text-gray-400">{{ t.advGoldDrop20 }}</span><span class="text-red-400">RM 113,142</span></div>
+              <div class="flex justify-between"><span class="text-gray-400">{{ t.advGoldYourLoan }}</span><span class="text-gray-200">RM 113,140</span></div>
+            </div>
+            <p class="text-xs text-red-400/80 mt-3">{{ t.advGoldRiskWarn }}</p>
+          </div>
+        </div>
+
+        <!-- Quick Decision Guide -->
+        <div class="bg-gradient-to-r from-gold-500/10 to-dark-700 rounded-xl p-6 border border-gold-500/30">
+          <h2 class="text-lg font-semibold text-gold-400 mb-4">{{ t.advDecisionTitle }}</h2>
+          <div class="space-y-4">
+            <div v-for="(q, idx) in t.advDecisions" :key="idx" class="bg-dark-800/80 rounded-lg p-4">
+              <p class="text-sm text-gold-300 font-medium mb-2">{{ q.question }}</p>
+              <div class="flex gap-4 text-xs">
+                <div class="flex-1 bg-green-500/10 rounded p-2 border border-green-500/20">
+                  <p class="text-green-400 font-medium mb-1">{{ t.advYes }}</p>
+                  <p class="text-gray-400">{{ q.yes }}</p>
+                </div>
+                <div class="flex-1 bg-red-500/10 rounded p-2 border border-red-500/20">
+                  <p class="text-red-400 font-medium mb-1">{{ t.advNo }}</p>
+                  <p class="text-gray-400">{{ q.no }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
     </main>
 
     <footer class="max-w-6xl mx-auto px-4 py-6 mt-8 border-t border-dark-600 text-center text-xs text-gray-600">
@@ -1195,6 +1357,7 @@
           calculator: 'Calculator',
           tracker: 'Tracker',
           simulator: 'Simulator',
+          advice: 'Advice',
         },
         calcTitle: 'Ar-Rahnu Calculator',
         weight: 'Gold Weight',
@@ -1427,6 +1590,66 @@
         guideTip3: 'Consider early redemption if you have the funds — you save on profit charges for the remaining months.',
         guideTip4: 'Use the Simulator to compare rollover vs redemption before deciding to renew your pledge.',
         guideTip5: 'Export your data regularly as a backup — all data is stored locally in your browser only.',
+        // Advice Tab
+        advWhenGoodTitle: 'When Ar-Rahnu Makes Sense',
+        advWhenGood: [
+          { title: 'Short-term cash needs (1-3 months)', desc: 'Redeem quickly to minimize profit charges. Ar-Rahnu is ideal for bridging temporary cash shortfalls.' },
+          { title: 'Emergency funds', desc: 'When you need cash urgently but don\'t want to sell your gold at a potentially low price.' },
+          { title: 'Gold price is rising', desc: 'Your gold appreciates while pledged. You benefit from the price increase when you eventually redeem.' },
+          { title: 'No other financing available', desc: 'Ar-Rahnu has no credit check, no income verification, and instant disbursement.' }
+        ],
+        advWhenBadTitle: 'When Ar-Rahnu Doesn\'t Make Sense',
+        advWhenBad: [
+          { title: 'Ongoing cash flow needs', desc: 'At ~10.2% p.a., it\'s expensive. Personal loans (3-6% p.a.) or microfinancing may be cheaper for long-term needs.' },
+          { title: 'Multiple rollovers planned', desc: 'Each rollover compounds charges into principal. After 3+ rollovers, the cost escalates significantly.' },
+          { title: 'Gold price is falling', desc: 'If gold drops 20%, your marhun value may fall below your loan. You risk losing both money AND gold.' },
+          { title: 'You can sell some gold instead', desc: 'Selling a small portion to raise cash is often cheaper than paying 18 months of profit charges.' }
+        ],
+        advDoTitle: 'Smart Borrower Tips',
+        advDo: [
+          { title: 'Redeem as early as possible', desc: 'Every month you hold costs you money. Redeem the moment you have the funds.' },
+          { title: 'Don\'t max out at 80% MOF', desc: 'Borrow less if you can. At 60-70% MOF, you have a buffer if gold prices drop, and your profit charges are calculated on marhun value regardless.' },
+          { title: 'Pay cycle profits on time', desc: 'Late payment = gold forfeited. Set reminders for your 6-month cycle payment dates.' },
+          { title: 'Track your total cost', desc: 'Use the Loan Growth Tracker to see how rollovers compound. Know your real cost before deciding to renew.' },
+          { title: 'Compare before rolling over', desc: 'Sometimes selling a small portion of gold to pay off the loan is cheaper than rolling over and paying more months of profit.' },
+          { title: 'Keep some gold in reserve', desc: 'Don\'t pledge everything. Keep some unpledged gold as backup in case you need to top up margin or cover emergencies.' }
+        ],
+        advDontTitle: 'Common Mistakes to Avoid',
+        advDont: [
+          { title: 'Don\'t treat Ar-Rahnu as long-term financing', desc: 'It\'s designed for short-term needs. The effective annual rate (~10.2%) makes it expensive beyond 6 months.' },
+          { title: 'Don\'t keep rolling over blindly', desc: 'Each rollover adds accumulated profit to your principal. The snowball effect can increase your debt by 7-10% per cycle.' },
+          { title: 'Don\'t withdraw extra cash on rollovers', desc: 'The extra RM 2,000-4,000 you take out gets added to principal and you pay profit on it for the entire next cycle.' },
+          { title: 'Don\'t ignore gold price movements', desc: 'A 20% gold price drop means your 80% MOF loan is now 100% of your gold value. The bank may not renew your pledge.' },
+          { title: 'Don\'t forget payment dates', desc: 'There is no reminder system from the bank. Missing a payment deadline means your gold is forfeited — no second chances.' }
+        ],
+        advCostTitle: 'Know Your Real Cost',
+        advCostIntro: 'At the highest tier (marhun > RM10,000), the profit rate is RM0.85 per RM100 per month. Here\'s what that costs at different marhun values:',
+        advCostScenario: 'Marhun Value',
+        advCostMonthly: 'Monthly',
+        advCost6m: '6 Months',
+        advCost18m: '18 Months',
+        advCostNote: 'Based on RM0.85 per RM100/month rate. Highlighted row shows a real example from actual Bank Rakyat documents.',
+        advRolloverTitle: 'The Rollover Trap',
+        advRolloverBody: 'When you rollover (gadai semula), the bank pays off your old account with a new, larger loan. The difference between the new loan and the old one includes accumulated profit charges plus any cash you withdraw.',
+        advRolloverExample: 'Real example — 4 rollovers in 3 days:',
+        advRolloverTip: 'The loan grew by RM 8,013 (7.6%) in just 3 days due to accumulated charges and gold revaluation. Over multiple cycles, this compounds.',
+        advGoldRiskTitle: 'Gold Price Risk',
+        advGoldRiskBody: 'Your loan amount stays fixed, but your gold\'s value fluctuates. If gold drops significantly, your loan may exceed the 80% MOF limit, and the bank may not allow a rollover.',
+        advGoldRiskExample: 'Example with 200gm 24K gold (current value RM 141,428, loan RM 113,140):',
+        advGoldCurrent: 'Current marhun value',
+        advGoldDrop10: 'If gold drops 10%',
+        advGoldDrop20: 'If gold drops 20%',
+        advGoldYourLoan: 'Your loan amount',
+        advGoldRiskWarn: 'At a 20% gold drop, your loan equals your gold value — 100% MOF. The bank will likely not renew, and you must pay the full amount or lose your gold.',
+        advDecisionTitle: 'Quick Decision Guide',
+        advYes: 'Yes',
+        advNo: 'No',
+        advDecisions: [
+          { question: 'Can you repay within 3 months?', yes: 'Ar-Rahnu is a good option. Short-term cost is manageable.', no: 'Consider cheaper alternatives like personal loans or selling some gold.' },
+          { question: 'Is gold price trending up?', yes: 'Your gold appreciates while pledged — good time to hold.', no: 'Risky. A price drop could trap you in a losing position.' },
+          { question: 'Do you plan to rollover more than twice?', yes: 'Stop and reconsider. The compounding cost may exceed what you\'re getting.', no: 'Manageable. Just track your cycle payments carefully.' },
+          { question: 'Is this for an emergency?', yes: 'Ar-Rahnu is designed for this. Pledge and redeem as soon as possible.', no: 'Plan ahead. There may be cheaper financing options available.' }
+        ],
       },
       bm: {
         goldPrice: 'Harga Emas',
@@ -1438,6 +1661,7 @@
           calculator: 'Kalkulator',
           tracker: 'Penjejak',
           simulator: 'Simulasi',
+          advice: 'Nasihat',
         },
         calcTitle: 'Kalkulator Ar-Rahnu',
         weight: 'Berat Emas',
@@ -1670,6 +1894,66 @@
         guideTip3: 'Pertimbangkan penebusan awal jika anda mempunyai dana — anda jimat caj keuntungan untuk bulan yang tinggal.',
         guideTip4: 'Gunakan Simulasi untuk membandingkan gadai semula vs penebusan sebelum memutuskan untuk memperbaharui gadaian.',
         guideTip5: 'Eksport data anda secara berkala sebagai sandaran — semua data disimpan secara tempatan dalam pelayar anda sahaja.',
+        // Advice Tab
+        advWhenGoodTitle: 'Bila Ar-Rahnu Sesuai',
+        advWhenGood: [
+          { title: 'Keperluan tunai jangka pendek (1-3 bulan)', desc: 'Tebus dengan cepat untuk kurangkan caj keuntungan. Ar-Rahnu sesuai untuk menampung kekurangan tunai sementara.' },
+          { title: 'Dana kecemasan', desc: 'Apabila anda perlukan wang segera tetapi tidak mahu menjual emas pada harga yang mungkin rendah.' },
+          { title: 'Harga emas sedang naik', desc: 'Emas anda meningkat nilainya semasa digadai. Anda mendapat manfaat kenaikan harga apabila menebus nanti.' },
+          { title: 'Tiada pembiayaan lain tersedia', desc: 'Ar-Rahnu tidak memerlukan semakan kredit, pengesahan pendapatan, dan pengeluaran segera.' }
+        ],
+        advWhenBadTitle: 'Bila Ar-Rahnu Tidak Sesuai',
+        advWhenBad: [
+          { title: 'Keperluan aliran tunai berterusan', desc: 'Pada ~10.2% setahun, ia mahal. Pinjaman peribadi (3-6% setahun) atau pembiayaan mikro mungkin lebih murah untuk keperluan jangka panjang.' },
+          { title: 'Merancang gadai semula berkali-kali', desc: 'Setiap gadai semula menggabungkan caj ke dalam prinsipal. Selepas 3+ gadai semula, kos meningkat dengan ketara.' },
+          { title: 'Harga emas sedang jatuh', desc: 'Jika emas jatuh 20%, nilai marhun mungkin jatuh di bawah pinjaman. Anda berisiko kehilangan wang DAN emas.' },
+          { title: 'Anda boleh jual sebahagian emas', desc: 'Menjual sebahagian kecil untuk dapatkan tunai sering lebih murah daripada membayar 18 bulan caj keuntungan.' }
+        ],
+        advDoTitle: 'Tips Peminjam Bijak',
+        advDo: [
+          { title: 'Tebus secepat mungkin', desc: 'Setiap bulan anda pegang menelan kos. Tebus sebaik sahaja anda mempunyai dana.' },
+          { title: 'Jangan maksimumkan 80% MOF', desc: 'Pinjam kurang jika boleh. Pada 60-70% MOF, anda ada penimbal jika harga emas jatuh.' },
+          { title: 'Bayar keuntungan kitaran tepat pada masa', desc: 'Pembayaran lewat = emas dilucuthak. Tetapkan peringatan untuk tarikh pembayaran kitaran 6 bulan anda.' },
+          { title: 'Jejak jumlah kos anda', desc: 'Gunakan Penjejak Pertumbuhan Pinjaman untuk melihat bagaimana gadai semula berganda. Ketahui kos sebenar sebelum memutuskan untuk memperbaharui.' },
+          { title: 'Bandingkan sebelum gadai semula', desc: 'Kadangkala menjual sebahagian kecil emas untuk membayar pinjaman lebih murah daripada gadai semula.' },
+          { title: 'Simpan emas sebagai rizab', desc: 'Jangan gadai semuanya. Simpan emas yang tidak digadai sebagai sandaran sekiranya perlu menambah margin.' }
+        ],
+        advDontTitle: 'Kesilapan Biasa Yang Perlu Dielakkan',
+        advDont: [
+          { title: 'Jangan anggap Ar-Rahnu sebagai pembiayaan jangka panjang', desc: 'Ia direka untuk keperluan jangka pendek. Kadar efektif tahunan (~10.2%) menjadikannya mahal melebihi 6 bulan.' },
+          { title: 'Jangan terus gadai semula secara membuta', desc: 'Setiap gadai semula menambah keuntungan terkumpul ke prinsipal. Kesan bola salji boleh meningkatkan hutang 7-10% setiap kitaran.' },
+          { title: 'Jangan keluarkan wang tunai tambahan semasa gadai semula', desc: 'Wang tambahan RM 2,000-4,000 yang diambil ditambah ke prinsipal dan anda bayar keuntungan atasnya untuk keseluruhan kitaran berikutnya.' },
+          { title: 'Jangan abaikan pergerakan harga emas', desc: 'Kejatuhan harga emas 20% bermakna pinjaman 80% MOF anda kini 100% daripada nilai emas. Bank mungkin tidak memperbaharui gadaian.' },
+          { title: 'Jangan lupa tarikh pembayaran', desc: 'Tiada sistem peringatan daripada bank. Terlepas tarikh akhir pembayaran bermakna emas dilucuthak — tiada peluang kedua.' }
+        ],
+        advCostTitle: 'Ketahui Kos Sebenar Anda',
+        advCostIntro: 'Pada tier tertinggi (marhun > RM10,000), kadar keuntungan ialah RM0.85 per RM100 sebulan. Berikut kos pada nilai marhun berbeza:',
+        advCostScenario: 'Nilai Marhun',
+        advCostMonthly: 'Bulanan',
+        advCost6m: '6 Bulan',
+        advCost18m: '18 Bulan',
+        advCostNote: 'Berdasarkan kadar RM0.85 per RM100/bulan. Baris yang ditandakan menunjukkan contoh sebenar daripada dokumen Bank Rakyat.',
+        advRolloverTitle: 'Perangkap Gadai Semula',
+        advRolloverBody: 'Apabila anda gadai semula, bank membayar akaun lama dengan pinjaman baru yang lebih besar. Perbezaan antara pinjaman baru dan lama termasuk caj keuntungan terkumpul serta wang tunai yang dikeluarkan.',
+        advRolloverExample: 'Contoh sebenar — 4 gadai semula dalam 3 hari:',
+        advRolloverTip: 'Pinjaman meningkat sebanyak RM 8,013 (7.6%) dalam hanya 3 hari akibat caj terkumpul dan penilaian semula emas. Dalam beberapa kitaran, ini berganda.',
+        advGoldRiskTitle: 'Risiko Harga Emas',
+        advGoldRiskBody: 'Jumlah pinjaman anda kekal tetap, tetapi nilai emas berubah-ubah. Jika emas jatuh dengan ketara, pinjaman mungkin melebihi had MOF 80%, dan bank mungkin tidak membenarkan gadai semula.',
+        advGoldRiskExample: 'Contoh dengan emas 200gm 24K (nilai semasa RM 141,428, pinjaman RM 113,140):',
+        advGoldCurrent: 'Nilai marhun semasa',
+        advGoldDrop10: 'Jika emas jatuh 10%',
+        advGoldDrop20: 'Jika emas jatuh 20%',
+        advGoldYourLoan: 'Jumlah pinjaman anda',
+        advGoldRiskWarn: 'Pada kejatuhan emas 20%, pinjaman anda sama dengan nilai emas — 100% MOF. Bank kemungkinan besar tidak akan memperbaharui, dan anda mesti bayar jumlah penuh atau kehilangan emas.',
+        advDecisionTitle: 'Panduan Keputusan Pantas',
+        advYes: 'Ya',
+        advNo: 'Tidak',
+        advDecisions: [
+          { question: 'Bolehkah anda bayar balik dalam 3 bulan?', yes: 'Ar-Rahnu pilihan baik. Kos jangka pendek boleh diurus.', no: 'Pertimbangkan alternatif lebih murah seperti pinjaman peribadi atau jual sebahagian emas.' },
+          { question: 'Adakah harga emas sedang naik?', yes: 'Emas anda meningkat nilai semasa digadai — masa baik untuk pegang.', no: 'Berisiko. Kejatuhan harga boleh memerangkap anda dalam kedudukan rugi.' },
+          { question: 'Adakah anda merancang gadai semula lebih dari dua kali?', yes: 'Berhenti dan pertimbangkan semula. Kos berganda mungkin melebihi apa yang anda perolehi.', no: 'Boleh diurus. Cuma jejak pembayaran kitaran anda dengan teliti.' },
+          { question: 'Adakah ini untuk kecemasan?', yes: 'Ar-Rahnu direka untuk ini. Gadai dan tebus secepat mungkin.', no: 'Rancang ke hadapan. Mungkin ada pilihan pembiayaan lebih murah.' }
+        ],
       },
     }
 
@@ -1685,6 +1969,7 @@
             { id: 'calculator' },
             { id: 'tracker' },
             { id: 'simulator' },
+            { id: 'advice' },
           ],
           // Calculator
           // Withdrawable Amount
