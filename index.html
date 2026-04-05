@@ -236,9 +236,71 @@
           <div class="flex gap-2">
             <button @click="exportData" class="bg-dark-600 hover:bg-dark-500 text-gray-300 px-3 py-2 rounded-lg text-sm transition">{{ t.export }}</button>
             <button @click="importData" class="bg-dark-600 hover:bg-dark-500 text-gray-300 px-3 py-2 rounded-lg text-sm transition">{{ t.import }}</button>
+            <button @click="showExamples = !showExamples" class="bg-dark-600 hover:bg-dark-500 text-gold-300 px-3 py-2 rounded-lg text-sm transition">{{ t.loadExamples }}</button>
             <button v-if="accounts.length" @click="clearAllData" class="bg-dark-600 hover:bg-red-900/50 text-gray-300 hover:text-red-400 px-3 py-2 rounded-lg text-sm transition">{{ t.clearAll }}</button>
           </div>
           <button @click="openNewAccountForm" class="bg-gold-500 hover:bg-gold-600 text-dark-900 px-4 py-2 rounded-lg text-sm font-medium transition">+ {{ t.addAccount }}</button>
+        </div>
+
+        <!-- Example Accounts Panel -->
+        <div v-if="showExamples" class="bg-dark-700 rounded-xl p-5 border border-gold-500/30">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="text-sm font-semibold text-gold-400">{{ t.exampleTitle }}</h3>
+            <button @click="showExamples = false" class="text-gray-400 hover:text-gray-200 text-sm">&times;</button>
+          </div>
+          <p class="text-xs text-gray-500 mb-4">{{ t.exampleDesc }}</p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <!-- Example 1: Gold Wafers -->
+            <div class="bg-dark-800 rounded-lg p-4 border border-dark-600">
+              <div class="flex justify-between items-start mb-2">
+                <div>
+                  <h4 class="text-sm font-medium text-gold-300">{{ t.example1Title }}</h4>
+                  <p class="text-xs text-gray-500">63-4321863-6 | Kubang Kerian</p>
+                </div>
+                <button @click="loadExample('wafers')" class="bg-gold-500 hover:bg-gold-600 text-dark-900 px-3 py-1 rounded text-xs font-medium transition">{{ t.load }}</button>
+              </div>
+              <div class="text-xs text-gray-400 space-y-1">
+                <p>2x Wafer Emas 24K (100gm {{ t.each }})</p>
+                <p>{{ t.marhunValue }}: <span class="text-gold-300">RM 141,428.00</span></p>
+                <p>{{ t.financing }}: <span class="text-green-400">RM 113,140.00</span></p>
+                <p>{{ t.tenure }}: 03/04/2026 — 09/10/2027</p>
+              </div>
+            </div>
+            <!-- Example 2: Jewellery -->
+            <div class="bg-dark-800 rounded-lg p-4 border border-dark-600">
+              <div class="flex justify-between items-start mb-2">
+                <div>
+                  <h4 class="text-sm font-medium text-gold-300">{{ t.example2Title }}</h4>
+                  <p class="text-xs text-gray-500">K530497072 | Kubang Kerian</p>
+                </div>
+                <button @click="loadExample('jewellery')" class="bg-gold-500 hover:bg-gold-600 text-dark-900 px-3 py-1 rounded text-xs font-medium transition">{{ t.load }}</button>
+              </div>
+              <div class="text-xs text-gray-400 space-y-1">
+                <p>Rantai, Gelang, Loket (21K, 235gm)</p>
+                <p>{{ t.marhunValue }}: <span class="text-gold-300">RM 80,273.40</span></p>
+                <p>{{ t.financing }}: <span class="text-green-400">RM 48,170.00</span></p>
+                <p>{{ t.tenure }}: 19/09/2025 — 09/11/2026</p>
+              </div>
+            </div>
+            <!-- Example 3: Rollover Chain -->
+            <div class="md:col-span-2 bg-dark-800 rounded-lg p-4 border border-dark-600">
+              <div class="flex justify-between items-start mb-2">
+                <div>
+                  <h4 class="text-sm font-medium text-gold-300">{{ t.example3Title }}</h4>
+                  <p class="text-xs text-gray-500">{{ t.example3Desc }}</p>
+                </div>
+                <button @click="loadExample('rolloverChain')" class="bg-gold-500 hover:bg-gold-600 text-dark-900 px-3 py-1 rounded text-xs font-medium transition">{{ t.load }}</button>
+              </div>
+              <div class="text-xs text-gray-400">
+                <p>63-4310840-6 → 63-4313728-4 → 63-4317841-9 → 63-4321863-6</p>
+                <p class="mt-1">{{ t.example3Note }}</p>
+              </div>
+            </div>
+            <!-- Load All -->
+            <div class="md:col-span-2">
+              <button @click="loadExample('all')" class="w-full bg-gold-500/20 hover:bg-gold-500/30 text-gold-400 border border-gold-500/30 px-4 py-2 rounded-lg text-sm font-medium transition">{{ t.loadAll }}</button>
+            </div>
+          </div>
         </div>
 
         <div v-if="accounts.length" class="space-y-4">
@@ -711,6 +773,17 @@
         noAccountNo: 'No Account #',
         edit: 'Edit',
         delete: 'Delete',
+        loadExamples: 'Examples',
+        exampleTitle: 'Pre-loaded Example Accounts',
+        exampleDesc: 'Load sample accounts based on real Bank Rakyat Ar-Rahnu documents. These will be added to your existing accounts.',
+        example1Title: 'Gold Wafers (200gm 24K)',
+        example2Title: 'Mixed Jewellery (21K)',
+        example3Title: 'Full Rollover Chain (4 accounts)',
+        example3Desc: '3 rolled-over accounts + 1 active account showing the renewal cycle',
+        example3Note: 'Shows how financing increases as gold is revalued across rollovers',
+        load: 'Load',
+        loadAll: 'Load All Examples',
+        each: 'each',
         noAccounts: 'No accounts yet',
         addAccountHint: 'Add your first Ar-Rahnu account to start tracking',
         accountNo: 'Account No',
@@ -830,6 +903,17 @@
         noAccountNo: 'Tiada No. Akaun',
         edit: 'Edit',
         delete: 'Padam',
+        loadExamples: 'Contoh',
+        exampleTitle: 'Contoh Akaun Pra-Muat',
+        exampleDesc: 'Muatkan contoh akaun berdasarkan dokumen sebenar Bank Rakyat Ar-Rahnu. Akan ditambah kepada akaun sedia ada.',
+        example1Title: 'Wafer Emas (200gm 24K)',
+        example2Title: 'Barang Kemas Campuran (21K)',
+        example3Title: 'Rantaian Gadai Semula Penuh (4 akaun)',
+        example3Desc: '3 akaun digadai semula + 1 akaun aktif menunjukkan kitaran pembaharuan',
+        example3Note: 'Menunjukkan bagaimana pembiayaan meningkat apabila emas dinilai semula',
+        load: 'Muat',
+        loadAll: 'Muat Semua Contoh',
+        each: 'setiap satu',
         noAccounts: 'Tiada akaun lagi',
         addAccountHint: 'Tambah akaun Ar-Rahnu pertama anda',
         accountNo: 'No Akaun',
@@ -969,6 +1053,7 @@
           // Tracker
           accounts: [],
           showAccountForm: false,
+          showExamples: false,
           editingAccountId: null,
           newAccount: {
             accountNo: '',
@@ -1288,6 +1373,131 @@
             reader.readAsText(file)
           }
           input.click()
+        },
+        loadExample(type) {
+          const waferAcct = {
+            id: 'ex-wafer-001',
+            accountNo: '63-4321863-6',
+            financingAccountNo: '63-4317841-9',
+            branch: 'Kubang Kerian (00105)',
+            status: 'active',
+            createdDate: '2026-04-03',
+            maturityDate: '2027-10-09',
+            items: [
+              { description: 'Wafer Emas UD 24K #1', karat: 24, weightGm: 100, valueMYR: 70714 },
+              { description: 'Wafer Emas UD 24K #2', karat: 24, weightGm: 100, valueMYR: 70714 }
+            ],
+            financingAmount: 113140,
+            rolloverFrom: 'ex-roll-003',
+            rolloverTo: null,
+            notes: 'Latest active account — 200gm 24K gold wafers',
+            paymentSchedule: [
+              { cycle: 1, dueDate: '2026-10-05', amount: 7212.83, paid: false },
+              { cycle: 2, dueDate: '2027-04-05', amount: 7212.83, paid: false },
+              { cycle: 3, dueDate: '2027-10-05', amount: 7212.83, paid: false }
+            ]
+          }
+          const jewelleryAcct = {
+            id: 'ex-jewellery-001',
+            accountNo: 'K530497072',
+            financingAccountNo: '',
+            branch: 'Kubang Kerian (00105)',
+            status: 'active',
+            createdDate: '2025-09-19',
+            maturityDate: '2026-11-09',
+            items: [
+              { description: 'Rantai Tangan UA', karat: 21, weightGm: 35.05, valueMYR: 13600.74 },
+              { description: 'Rantai Leher UD', karat: 21, weightGm: 11.74, valueMYR: 4967.12 },
+              { description: 'Gelang Tangan UD', karat: 21, weightGm: 53.48, valueMYR: 21432.54 },
+              { description: 'Loket UD', karat: 21, weightGm: 134.81, valueMYR: 40273.00 }
+            ],
+            financingAmount: 48170,
+            rolloverFrom: null,
+            rolloverTo: null,
+            notes: 'Mixed jewellery — chains, bracelet, pendant',
+            paymentSchedule: [
+              { cycle: 1, dueDate: '2026-03-19', amount: 4094.37, paid: true },
+              { cycle: 2, dueDate: '2026-09-19', amount: 4094.37, paid: false },
+              { cycle: 3, dueDate: '2027-03-19', amount: 4094.37, paid: false }
+            ]
+          }
+          const rolloverChain = [
+            {
+              id: 'ex-roll-001',
+              accountNo: '63-4310840-6',
+              financingAccountNo: '',
+              branch: 'Kubang Kerian (00105)',
+              status: 'rolled_over',
+              createdDate: '2026-03-25',
+              maturityDate: '2027-09-25',
+              items: [
+                { description: 'Wafer Emas UD 24K #1', karat: 24, weightGm: 100, valueMYR: 66960 },
+                { description: 'Wafer Emas UD 24K #2', karat: 24, weightGm: 100, valueMYR: 66960 }
+              ],
+              financingAmount: 105126.70,
+              rolloverFrom: null,
+              rolloverTo: 'ex-roll-002',
+              notes: 'Rollover chain start — 31/03/2026',
+              paymentSchedule: []
+            },
+            {
+              id: 'ex-roll-002',
+              accountNo: '63-4313728-4',
+              financingAccountNo: '63-4310840-6',
+              branch: 'Kubang Kerian (00105)',
+              status: 'rolled_over',
+              createdDate: '2026-03-31',
+              maturityDate: '2027-09-30',
+              items: [
+                { description: 'Wafer Emas UD 24K #1', karat: 24, weightGm: 100, valueMYR: 69388 },
+                { description: 'Wafer Emas UD 24K #2', karat: 24, weightGm: 100, valueMYR: 69388 }
+              ],
+              financingAmount: 107170,
+              rolloverFrom: 'ex-roll-001',
+              rolloverTo: 'ex-roll-003',
+              notes: 'Rollover #2 — 01/04/2026',
+              paymentSchedule: []
+            },
+            {
+              id: 'ex-roll-003',
+              accountNo: '63-4317841-9',
+              financingAccountNo: '63-4313728-4',
+              branch: 'Kubang Kerian (00105)',
+              status: 'rolled_over',
+              createdDate: '2026-04-01',
+              maturityDate: '2027-10-01',
+              items: [
+                { description: 'Wafer Emas UD 24K #1', karat: 24, weightGm: 100, valueMYR: 69513 },
+                { description: 'Wafer Emas UD 24K #2', karat: 24, weightGm: 100, valueMYR: 69513 }
+              ],
+              financingAmount: 111220,
+              rolloverFrom: 'ex-roll-002',
+              rolloverTo: 'ex-wafer-001',
+              notes: 'Rollover #3 — 02/04/2026',
+              paymentSchedule: []
+            }
+          ]
+
+          const existingIds = new Set(this.accounts.map(a => a.id))
+          const addIfNew = (accts) => {
+            for (const a of accts) {
+              if (!existingIds.has(a.id)) {
+                this.accounts.push(a)
+                existingIds.add(a.id)
+              }
+            }
+          }
+
+          if (type === 'wafers') {
+            addIfNew([waferAcct])
+          } else if (type === 'jewellery') {
+            addIfNew([jewelleryAcct])
+          } else if (type === 'rolloverChain') {
+            addIfNew([...rolloverChain, waferAcct])
+          } else if (type === 'all') {
+            addIfNew([...rolloverChain, waferAcct, jewelleryAcct])
+          }
+          this.showExamples = false
         },
         clearAllData() {
           if (confirm(this.t.confirmClearAll)) {
