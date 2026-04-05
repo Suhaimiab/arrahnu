@@ -914,6 +914,101 @@
               <p class="text-lg font-bold text-gold-400">RM {{ formatNumber(earlyRedemptionResult.netCost) }}</p>
             </div>
           </div>
+        <!-- Loan Growth Tracker -->
+        <div class="bg-dark-700 rounded-xl p-6 border border-dark-600">
+          <h2 class="text-lg font-semibold text-gold-400 mb-2">{{ t.loanGrowthTitle }}</h2>
+          <p class="text-xs text-gray-500 mb-4">{{ t.loanGrowthDesc }}</p>
+
+          <!-- Inputs -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div>
+              <label class="block text-sm text-gray-400 mb-1">{{ t.initialLoan }} (RM)</label>
+              <input type="number" v-model.number="loanGrowth.initialLoan" min="0" step="100"
+                class="w-full bg-dark-800 border border-dark-600 rounded-lg px-3 py-2 text-gray-100 focus:border-gold-500 focus:outline-none" placeholder="113140">
+            </div>
+            <div>
+              <label class="block text-sm text-gray-400 mb-1">{{ t.cashOutPerRollover }} (RM)</label>
+              <input type="number" v-model.number="loanGrowth.cashOut" min="0" step="100"
+                class="w-full bg-dark-800 border border-dark-600 rounded-lg px-3 py-2 text-gray-100 focus:border-gold-500 focus:outline-none" placeholder="2000">
+            </div>
+            <div>
+              <label class="block text-sm text-gray-400 mb-1">{{ t.numRollovers }}: {{ loanGrowth.rollovers }}</label>
+              <input type="range" v-model.number="loanGrowth.rollovers" min="1" max="10" step="1"
+                class="w-full accent-gold-500">
+            </div>
+          </div>
+
+          <!-- Growth Timeline -->
+          <div v-if="loanGrowthResult.length" class="space-y-3">
+            <!-- Visual Bar Chart -->
+            <div class="space-y-2">
+              <div v-for="(row, idx) in loanGrowthResult" :key="idx" class="flex items-center gap-3">
+                <span class="text-xs text-gray-500 w-8 text-right">{{ idx === 0 ? t.start : 'R' + idx }}</span>
+                <div class="flex-1 bg-dark-800 rounded-full h-7 relative overflow-hidden">
+                  <div class="h-full rounded-full flex items-center px-3 text-xs font-medium transition-all duration-500"
+                    :class="idx === 0 ? 'bg-green-500/30 text-green-400' : 'bg-red-500/20 text-red-400'"
+                    :style="{ width: Math.min(100, (row.balance / loanGrowthResult[loanGrowthResult.length - 1].balance) * 100) + '%' }">
+                    RM {{ formatNumber(row.balance) }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Growth Table -->
+            <div class="overflow-x-auto mt-4">
+              <table class="w-full text-sm">
+                <thead>
+                  <tr class="text-gray-400 border-b border-dark-600">
+                    <th class="text-left py-2">{{ t.rollover }}</th>
+                    <th class="text-right py-2">{{ t.prevBalance }}</th>
+                    <th class="text-right py-2">{{ t.chargesAccum }}</th>
+                    <th class="text-right py-2">{{ t.cashOutCol }}</th>
+                    <th class="text-right py-2">{{ t.newBalance }}</th>
+                    <th class="text-right py-2">{{ t.growthPct }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(row, idx) in loanGrowthResult" :key="idx"
+                    :class="idx === 0 ? 'text-green-400' : ''"
+                    class="border-b border-dark-600/50">
+                    <td class="py-2">{{ idx === 0 ? t.start : t.rollover + ' ' + idx }}</td>
+                    <td class="text-right">{{ idx === 0 ? '-' : 'RM ' + formatNumber(loanGrowthResult[idx-1].balance) }}</td>
+                    <td class="text-right text-red-400">{{ idx === 0 ? '-' : 'RM ' + formatNumber(row.charges) }}</td>
+                    <td class="text-right text-yellow-400">{{ idx === 0 ? '-' : 'RM ' + formatNumber(loanGrowth.cashOut || 0) }}</td>
+                    <td class="text-right font-medium">RM {{ formatNumber(row.balance) }}</td>
+                    <td class="text-right" :class="row.growthPct > 0 ? 'text-red-400' : 'text-gray-500'">{{ idx === 0 ? '-' : '+' + row.growthPct.toFixed(1) + '%' }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Summary -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+              <div class="bg-dark-800 rounded-lg p-4">
+                <p class="text-xs text-gray-400">{{ t.initialLoan }}</p>
+                <p class="text-lg font-bold text-green-400">RM {{ formatNumber(loanGrowth.initialLoan || 0) }}</p>
+              </div>
+              <div class="bg-dark-800 rounded-lg p-4">
+                <p class="text-xs text-gray-400">{{ t.finalBalance }}</p>
+                <p class="text-lg font-bold text-red-400">RM {{ formatNumber(loanGrowthResult[loanGrowthResult.length - 1].balance) }}</p>
+              </div>
+              <div class="bg-dark-800 rounded-lg p-4">
+                <p class="text-xs text-gray-400">{{ t.totalGrowth }}</p>
+                <p class="text-lg font-bold text-red-400">+ RM {{ formatNumber(loanGrowthResult[loanGrowthResult.length - 1].balance - (loanGrowth.initialLoan || 0)) }}</p>
+              </div>
+              <div class="bg-dark-800 rounded-lg p-4">
+                <p class="text-xs text-gray-400">{{ t.totalChargesPaid }}</p>
+                <p class="text-lg font-bold text-yellow-400">RM {{ formatNumber(loanGrowthResult.reduce((s, r) => s + r.charges, 0)) }}</p>
+              </div>
+            </div>
+
+            <!-- Warning -->
+            <div class="bg-red-500/5 border border-red-500/20 rounded-lg p-3 mt-2">
+              <p class="text-xs text-red-400/80">{{ t.loanGrowthWarning }}</p>
+            </div>
+          </div>
+        </div>
+
         </div>
       </div>
     </main>
@@ -1213,7 +1308,24 @@
         profitPaid: 'Profit Paid',
         profitFullTenure: 'Full Tenure Profit',
         youSave: 'You Save',
-        netCost: 'Net Cost (Financing + Profit)',
+        netCost: 'Net Cost (Financing + Charges)',
+        // Loan Growth
+        loanGrowthTitle: 'Loan Growth Tracker',
+        loanGrowthDesc: 'See how your outstanding loan balance grows with each rollover cycle. Charges accumulate over 6 months and get rolled into the new balance, plus any cash you withdraw.',
+        initialLoan: 'Initial Loan',
+        cashOutPerRollover: 'Cash Out per Rollover',
+        numRollovers: 'Number of Rollovers',
+        start: 'Start',
+        rollover: 'Rollover',
+        prevBalance: 'Previous Balance',
+        chargesAccum: 'Charges (6 months)',
+        cashOutCol: 'Cash Out',
+        newBalance: 'New Balance',
+        growthPct: 'Growth %',
+        finalBalance: 'Final Balance',
+        totalGrowth: 'Total Growth',
+        totalChargesPaid: 'Total Charges Rolled In',
+        loanGrowthWarning: 'Warning: Each rollover increases your loan balance because accumulated charges and any cash withdrawn are added to the principal. Over multiple rollovers, this compounding effect can significantly increase your total debt. Consider redeeming when possible to avoid excessive growth.',
         footerDesc: 'Personal Ar-Rahnu Calculator, Tracker & Simulator',
         footerDisclaimer: 'This tool is for personal reference only. Always verify with Bank Rakyat for official rates and calculations.',
         paymentSchedule: 'Payment Schedule',
@@ -1439,7 +1551,24 @@
         profitPaid: 'Keuntungan Dibayar',
         profitFullTenure: 'Keuntungan Penuh',
         youSave: 'Anda Jimat',
-        netCost: 'Kos Bersih (Pembiayaan + Keuntungan)',
+        netCost: 'Kos Bersih (Pembiayaan + Caj)',
+        // Loan Growth
+        loanGrowthTitle: 'Penjejak Pertumbuhan Pinjaman',
+        loanGrowthDesc: 'Lihat bagaimana baki pinjaman tertunggak meningkat dengan setiap kitaran gadai semula. Caj terkumpul selama 6 bulan dan dimasukkan ke dalam baki baru, bersama wang tunai yang dikeluarkan.',
+        initialLoan: 'Pinjaman Awal',
+        cashOutPerRollover: 'Wang Keluar per Gadai Semula',
+        numRollovers: 'Bilangan Gadai Semula',
+        start: 'Mula',
+        rollover: 'Gadai Semula',
+        prevBalance: 'Baki Sebelum',
+        chargesAccum: 'Caj (6 bulan)',
+        cashOutCol: 'Wang Keluar',
+        newBalance: 'Baki Baru',
+        growthPct: 'Pertumbuhan %',
+        finalBalance: 'Baki Akhir',
+        totalGrowth: 'Jumlah Pertumbuhan',
+        totalChargesPaid: 'Jumlah Caj Dimasukkan',
+        loanGrowthWarning: 'Amaran: Setiap gadai semula meningkatkan baki pinjaman kerana caj terkumpul dan wang tunai yang dikeluarkan ditambah kepada prinsipal. Selepas beberapa gadai semula, kesan pengkompaunan ini boleh meningkatkan jumlah hutang anda dengan ketara. Pertimbangkan untuk menebus apabila boleh bagi mengelakkan pertumbuhan berlebihan.',
         footerDesc: 'Kalkulator, Penjejak & Simulasi Ar-Rahnu Peribadi',
         footerDisclaimer: 'Alat ini untuk rujukan peribadi sahaja. Sentiasa sahkan dengan Bank Rakyat untuk kadar dan pengiraan rasmi.',
         paymentSchedule: 'Jadual Pembayaran',
@@ -1608,6 +1737,12 @@
           },
           rolloverCalc: {
             monthsBeforeRedeem: 6
+          },
+          // Loan Growth
+          loanGrowth: {
+            initialLoan: 113140,
+            cashOut: 2000,
+            rollovers: 4
           },
           // Tracker
           accounts: [],
@@ -1784,6 +1919,33 @@
           const profitPaid = this.simMonthlyProfit * months
           const profitFull = this.simMonthlyProfit * this.sim.tenure
           return { profitPaid, profitFull, saved: profitFull - profitPaid, netCost: this.simFinancing + profitPaid }
+        },
+        loanGrowthResult() {
+          const results = []
+          const initial = this.loanGrowth.initialLoan || 0
+          const cashOut = this.loanGrowth.cashOut || 0
+          const rollovers = this.loanGrowth.rollovers || 1
+          if (!initial) return results
+
+          // Calculate the monthly charge rate based on the marhun value from sim
+          // The charge accumulates over 6 months (one cycle) before each rollover
+          const marhunValue = this.simMarhunValue || initial / 0.8 // estimate marhun if sim not set
+          const rate = this.getProfitRate(marhunValue)
+          const monthlyCharge = marhunValue / 100 * rate
+
+          // Initial state
+          results.push({ balance: initial, charges: 0, growthPct: 0 })
+
+          let balance = initial
+          for (let i = 1; i <= rollovers; i++) {
+            // Each rollover: accumulated charges for 6 months + any cash withdrawn
+            const charges = monthlyCharge * 6
+            const newBalance = balance + charges + cashOut
+            const growthPct = balance > 0 ? ((newBalance - balance) / balance) * 100 : 0
+            results.push({ balance: newBalance, charges, growthPct })
+            balance = newBalance
+          }
+          return results
         },
         activeAccounts() {
           return this.accounts.filter(a => a.status === 'active')
