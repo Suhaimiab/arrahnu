@@ -222,7 +222,12 @@
           </div>
         </div>
 
-        <div class="flex justify-end">
+        <div class="flex justify-between items-center flex-wrap gap-2">
+          <div class="flex gap-2">
+            <button @click="exportData" class="bg-dark-600 hover:bg-dark-500 text-gray-300 px-3 py-2 rounded-lg text-sm transition">{{ t.export }}</button>
+            <button @click="importData" class="bg-dark-600 hover:bg-dark-500 text-gray-300 px-3 py-2 rounded-lg text-sm transition">{{ t.import }}</button>
+            <button v-if="accounts.length" @click="clearAllData" class="bg-dark-600 hover:bg-red-900/50 text-gray-300 hover:text-red-400 px-3 py-2 rounded-lg text-sm transition">{{ t.clearAll }}</button>
+          </div>
           <button @click="openNewAccountForm" class="bg-gold-500 hover:bg-gold-600 text-dark-900 px-4 py-2 rounded-lg text-sm font-medium transition">+ {{ t.addAccount }}</button>
         </div>
 
@@ -262,6 +267,20 @@
                   <p class="text-xs text-gray-500">{{ getDaysRemaining(getNextPaymentDue(account).dueDate) }} {{ t.daysLeft }}</p>
                 </template>
                 <p v-else class="text-gray-500">-</p>
+              </div>
+            </div>
+            <!-- Rollover Chain -->
+            <div v-if="getRolloverChain(account.id).length > 1" class="mt-3 pt-3 border-t border-dark-600">
+              <p class="text-xs text-gray-500 mb-2">{{ t.rolloverChain }}</p>
+              <div class="flex items-center gap-1 flex-wrap text-xs">
+                <template v-for="(node, idx) in getRolloverChain(account.id)" :key="node.id">
+                  <span :class="node.id === account.id ? 'bg-gold-500/20 text-gold-400 border-gold-500/50' : 'bg-dark-800 text-gray-400 border-dark-600'"
+                    class="border rounded px-2 py-1">
+                    {{ node.accountNo }} <span class="text-gray-500">{{ formatDate(node.createdDate) }}</span>
+                    <span class="ml-1">RM {{ formatNumber(node.financingAmount || 0) }}</span>
+                  </span>
+                  <span v-if="idx < getRolloverChain(account.id).length - 1" class="text-gray-600">&rarr;</span>
+                </template>
               </div>
             </div>
           </div>
@@ -312,6 +331,13 @@
               <div>
                 <label class="block text-sm text-gray-400 mb-1">{{ t.financingAmount }} *</label>
                 <input type="number" v-model.number="newAccount.financingAmount" min="0" step="0.01" class="w-full bg-dark-800 border border-dark-600 rounded-lg px-3 py-2 text-gray-100 focus:border-gold-500 focus:outline-none">
+              </div>
+              <div v-if="accounts.length">
+                <label class="block text-sm text-gray-400 mb-1">{{ t.rolloverFrom }}</label>
+                <select v-model="newAccount.rolloverFrom" class="w-full bg-dark-800 border border-dark-600 rounded-lg px-3 py-2 text-gray-100 focus:border-gold-500 focus:outline-none">
+                  <option :value="null">{{ t.none }}</option>
+                  <option v-for="a in accounts.filter(a => a.id !== editingAccountId)" :value="a.id">{{ a.accountNo }}</option>
+                </select>
               </div>
             </div>
             <div class="mb-4">
@@ -434,6 +460,18 @@
         errItemValue: 'Item value must be greater than 0',
         errFinancingMax: 'Financing cannot exceed 80% of marhun value',
         errFinancingRequired: 'Financing amount is required and must be greater than 0',
+        rolloverChain: 'Rollover Chain',
+        rolloverFrom: 'Rolled Over From',
+        none: 'None',
+        export: 'Export',
+        import: 'Import',
+        clearAll: 'Clear All',
+        confirmClearAll: 'Delete ALL accounts? This cannot be undone.',
+        importInvalid: 'Invalid file format. Expected Ar-Rahnu Pro JSON backup.',
+        importChoice: 'OK = Replace all data\nCancel = Merge (skip duplicates)',
+        importError: 'Failed to read file. Please check the format.',
+        importSkipped: 'Skipped invalid accounts',
+        importNoValid: 'No valid accounts found in file.',
       },
       bm: {
         goldPrice: 'Harga Emas',
@@ -503,6 +541,18 @@
         errItemValue: 'Nilai item mesti lebih daripada 0',
         errFinancingMax: 'Pembiayaan tidak boleh melebihi 80% nilai marhun',
         errFinancingRequired: 'Jumlah pembiayaan diperlukan dan mesti lebih daripada 0',
+        rolloverChain: 'Rantaian Gadai Semula',
+        rolloverFrom: 'Digadai Semula Dari',
+        none: 'Tiada',
+        export: 'Eksport',
+        import: 'Import',
+        clearAll: 'Padam Semua',
+        confirmClearAll: 'Padam SEMUA akaun? Tindakan ini tidak boleh dibatalkan.',
+        importInvalid: 'Format fail tidak sah. Fail JSON Ar-Rahnu Pro diperlukan.',
+        importChoice: 'OK = Ganti semua data\nBatal = Gabung (langkau duplikat)',
+        importError: 'Gagal membaca fail. Sila semak format.',
+        importSkipped: 'Akaun tidak sah dilangkau',
+        importNoValid: 'Tiada akaun sah dalam fail.',
       },
     }
 
@@ -724,7 +774,73 @@
           } else {
             this.accounts.push(accountData)
           }
+          if (accountData.rolloverFrom) {
+            const prev = this.accounts.find(a => a.id === accountData.rolloverFrom)
+            if (prev) prev.rolloverTo = accountData.id
+          }
           this.showAccountForm = false
+        },
+        getRolloverChain(accountId) {
+          const chain = []
+          let current = this.accounts.find(a => a.id === accountId)
+          while (current && current.rolloverFrom) {
+            current = this.accounts.find(a => a.id === current.rolloverFrom)
+          }
+          while (current) {
+            chain.push({ id: current.id, accountNo: current.accountNo, createdDate: current.createdDate, financingAmount: current.financingAmount })
+            if (current.rolloverTo) {
+              current = this.accounts.find(a => a.id === current.rolloverTo)
+            } else { break }
+          }
+          return chain
+        },
+        exportData() {
+          const data = { version: 1, exportedAt: new Date().toISOString(), accounts: this.accounts }
+          const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = 'arrahnu-backup-' + new Date().toISOString().split('T')[0] + '.json'
+          a.click()
+          URL.revokeObjectURL(url)
+        },
+        importData() {
+          const input = document.createElement('input')
+          input.type = 'file'
+          input.accept = '.json'
+          input.onchange = (e) => {
+            const file = e.target.files[0]
+            if (!file) return
+            const reader = new FileReader()
+            reader.onload = (ev) => {
+              try {
+                const data = JSON.parse(ev.target.result)
+                if (!data.accounts || !Array.isArray(data.accounts)) { alert(this.t.importInvalid); return }
+                const valid = []
+                const invalid = []
+                for (const acc of data.accounts) {
+                  if (acc.accountNo && acc.createdDate && acc.maturityDate && acc.items && acc.items.length > 0 && acc.financingAmount > 0) {
+                    valid.push(acc)
+                  } else { invalid.push(acc.accountNo || 'unknown') }
+                }
+                if (invalid.length) alert(this.t.importSkipped + ': ' + invalid.join(', '))
+                if (!valid.length) { alert(this.t.importNoValid); return }
+                const choice = confirm(this.t.importChoice)
+                if (choice) { this.accounts = valid } else {
+                  const existingIds = new Set(this.accounts.map(a => a.id))
+                  this.accounts.push(...valid.filter(a => !existingIds.has(a.id)))
+                }
+              } catch { alert(this.t.importError) }
+            }
+            reader.readAsText(file)
+          }
+          input.click()
+        },
+        clearAllData() {
+          if (confirm(this.t.confirmClearAll)) {
+            this.accounts = []
+            localStorage.removeItem('arrahnu_accounts')
+          }
         },
         deleteAccount(id) {
           if (confirm(this.t.confirmDelete)) { this.accounts = this.accounts.filter(a => a.id !== id) }
