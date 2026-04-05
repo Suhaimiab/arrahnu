@@ -72,6 +72,7 @@
           <button @click="toggleLang" class="bg-dark-600 hover:bg-dark-500 text-gold-300 px-3 py-1.5 rounded-lg text-sm font-medium transition">
             {{ lang === 'en' ? 'BM' : 'EN' }}
           </button>
+          <button @click="showGuide = true" class="bg-dark-600 hover:bg-dark-500 text-gold-300 w-8 h-8 rounded-lg text-sm font-bold transition" title="User Guide">?</button>
         </div>
       </div>
     </header>
@@ -922,6 +923,167 @@
       <p class="mt-1">{{ t.footerDisclaimer }}</p>
     </footer>
 
+    <!-- User Guide Modal -->
+    <div v-if="showGuide" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" @click.self="showGuide = false">
+      <div class="bg-dark-700 rounded-xl border border-gold-500/30 w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+        <!-- Guide Header -->
+        <div class="sticky top-0 bg-dark-700 border-b border-dark-600 px-6 py-4 flex justify-between items-center rounded-t-xl z-10">
+          <h2 class="text-lg font-bold text-gold-400">{{ t.guideTitle }}</h2>
+          <button @click="showGuide = false" class="text-gray-400 hover:text-gray-200 text-2xl leading-none">&times;</button>
+        </div>
+
+        <div class="px-6 py-4 space-y-6 text-sm text-gray-300 leading-relaxed">
+
+          <!-- Overview -->
+          <div>
+            <h3 class="text-gold-400 font-semibold text-base mb-2">{{ t.guideOverviewTitle }}</h3>
+            <p>{{ t.guideOverviewBody }}</p>
+          </div>
+
+          <!-- Getting Started -->
+          <div>
+            <h3 class="text-gold-400 font-semibold text-base mb-2">{{ t.guideStartTitle }}</h3>
+            <ol class="list-decimal list-inside space-y-1 text-gray-400">
+              <li>{{ t.guideStart1 }}</li>
+              <li>{{ t.guideStart2 }}</li>
+              <li>{{ t.guideStart3 }}</li>
+            </ol>
+          </div>
+
+          <!-- Gold Price -->
+          <div class="bg-dark-800 rounded-lg p-4 border border-dark-600">
+            <h3 class="text-gold-300 font-semibold mb-2">{{ t.guideGoldTitle }}</h3>
+            <p>{{ t.guideGoldBody }}</p>
+          </div>
+
+          <!-- Calculator -->
+          <div>
+            <h3 class="text-gold-400 font-semibold text-base mb-2">{{ t.guideCalcTitle }}</h3>
+            <div class="space-y-3">
+              <div>
+                <h4 class="text-gold-300 text-sm font-medium">{{ t.guideWithdrawTitle }}</h4>
+                <p class="text-gray-400">{{ t.guideWithdrawBody }}</p>
+              </div>
+              <div>
+                <h4 class="text-gold-300 text-sm font-medium">{{ t.guideCalcMainTitle }}</h4>
+                <p class="text-gray-400">{{ t.guideCalcMainBody }}</p>
+              </div>
+              <div>
+                <h4 class="text-gold-300 text-sm font-medium">{{ t.guideFeeTitle }}</h4>
+                <p class="text-gray-400">{{ t.guideFeeBody }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Profit Rate Table -->
+          <div class="bg-dark-800 rounded-lg p-4 border border-dark-600">
+            <h4 class="text-gold-300 font-semibold mb-2">{{ t.guideProfitTitle }}</h4>
+            <table class="w-full text-xs">
+              <thead><tr class="text-gray-500 border-b border-dark-600">
+                <th class="text-left py-1">{{ t.marhunValue }}</th>
+                <th class="text-right py-1">{{ t.guideRate }}</th>
+              </tr></thead>
+              <tbody class="text-gray-400">
+                <tr class="border-b border-dark-600/50"><td class="py-1">RM 0 – RM 499.99</td><td class="text-right">RM 0.60</td></tr>
+                <tr class="border-b border-dark-600/50"><td class="py-1">RM 500 – RM 4,999.99</td><td class="text-right">RM 0.75</td></tr>
+                <tr class="border-b border-dark-600/50"><td class="py-1">RM 5,000 – RM 9,999.99</td><td class="text-right">RM 0.80</td></tr>
+                <tr><td class="py-1">RM 10,000+</td><td class="text-right">RM 0.85</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Tracker -->
+          <div>
+            <h3 class="text-gold-400 font-semibold text-base mb-2">{{ t.guideTrackerTitle }}</h3>
+            <div class="space-y-3">
+              <div>
+                <h4 class="text-gold-300 text-sm font-medium">{{ t.guideDashTitle }}</h4>
+                <p class="text-gray-400">{{ t.guideDashBody }}</p>
+              </div>
+              <div>
+                <h4 class="text-gold-300 text-sm font-medium">{{ t.guideAccountTitle }}</h4>
+                <p class="text-gray-400">{{ t.guideAccountBody }}</p>
+              </div>
+              <div>
+                <h4 class="text-gold-300 text-sm font-medium">{{ t.guidePaymentTitle }}</h4>
+                <p class="text-gray-400">{{ t.guidePaymentBody }}</p>
+              </div>
+              <div>
+                <h4 class="text-gold-300 text-sm font-medium">{{ t.guideRolloverTitle }}</h4>
+                <p class="text-gray-400">{{ t.guideRolloverBody }}</p>
+              </div>
+              <div>
+                <h4 class="text-gold-300 text-sm font-medium">{{ t.guideExportTitle }}</h4>
+                <p class="text-gray-400">{{ t.guideExportBody }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Simulator -->
+          <div>
+            <h3 class="text-gold-400 font-semibold text-base mb-2">{{ t.guideSimTitle }}</h3>
+            <div class="space-y-3">
+              <div>
+                <h4 class="text-gold-300 text-sm font-medium">{{ t.guideScenarioTitle }}</h4>
+                <p class="text-gray-400">{{ t.guideScenarioBody }}</p>
+              </div>
+              <div>
+                <h4 class="text-gold-300 text-sm font-medium">{{ t.guideCompareTitle }}</h4>
+                <p class="text-gray-400">{{ t.guideCompareBody }}</p>
+              </div>
+              <div>
+                <h4 class="text-gold-300 text-sm font-medium">{{ t.guidePresetsTitle }}</h4>
+                <p class="text-gray-400">{{ t.guidePresetsBody }}</p>
+              </div>
+              <div>
+                <h4 class="text-gold-300 text-sm font-medium">{{ t.guideAddGoldTitle }}</h4>
+                <p class="text-gray-400">{{ t.guideAddGoldBody }}</p>
+              </div>
+              <div>
+                <h4 class="text-gold-300 text-sm font-medium">{{ t.guideRolloverCalcTitle }}</h4>
+                <p class="text-gray-400">{{ t.guideRolloverCalcBody }}</p>
+              </div>
+              <div>
+                <h4 class="text-gold-300 text-sm font-medium">{{ t.guideEarlyTitle }}</h4>
+                <p class="text-gray-400">{{ t.guideEarlyBody }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Key Terms -->
+          <div class="bg-dark-800 rounded-lg p-4 border border-dark-600">
+            <h3 class="text-gold-300 font-semibold mb-3">{{ t.guideTermsTitle }}</h3>
+            <dl class="space-y-2 text-xs">
+              <div class="flex gap-2"><dt class="text-gold-400 font-medium min-w-[120px]">Ar-Rahnu</dt><dd class="text-gray-400">{{ t.termArrahnu }}</dd></div>
+              <div class="flex gap-2"><dt class="text-gold-400 font-medium min-w-[120px]">Marhun</dt><dd class="text-gray-400">{{ t.termMarhun }}</dd></div>
+              <div class="flex gap-2"><dt class="text-gold-400 font-medium min-w-[120px]">{{ t.mof }}</dt><dd class="text-gray-400">{{ t.termMof }}</dd></div>
+              <div class="flex gap-2"><dt class="text-gold-400 font-medium min-w-[120px]">Upah Simpan</dt><dd class="text-gray-400">{{ t.termUpahSimpan }}</dd></div>
+              <div class="flex gap-2"><dt class="text-gold-400 font-medium min-w-[120px]">Tawarruq</dt><dd class="text-gray-400">{{ t.termTawarruq }}</dd></div>
+              <div class="flex gap-2"><dt class="text-gold-400 font-medium min-w-[120px]">Gadai Semula</dt><dd class="text-gray-400">{{ t.termGadaiSemula }}</dd></div>
+            </dl>
+          </div>
+
+          <!-- Tips -->
+          <div>
+            <h3 class="text-gold-400 font-semibold text-base mb-2">{{ t.guideTipsTitle }}</h3>
+            <ul class="list-disc list-inside space-y-1 text-gray-400">
+              <li>{{ t.guideTip1 }}</li>
+              <li>{{ t.guideTip2 }}</li>
+              <li>{{ t.guideTip3 }}</li>
+              <li>{{ t.guideTip4 }}</li>
+              <li>{{ t.guideTip5 }}</li>
+            </ul>
+          </div>
+
+        </div>
+
+        <!-- Guide Footer -->
+        <div class="sticky bottom-0 bg-dark-700 border-t border-dark-600 px-6 py-3 rounded-b-xl">
+          <button @click="showGuide = false" class="w-full bg-gold-500 hover:bg-gold-600 text-dark-900 py-2 rounded-lg text-sm font-medium transition">{{ t.guideClose }}</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <script>
@@ -1096,6 +1258,63 @@
         effectiveCostPct: 'Effective Cost %',
         latePaymentNote: 'Note: Late payment may result in the marhun (pledged items) being forfeited. Always ensure payments are made before the due date of each cycle.',
         monthsShort: 'm',
+        // User Guide
+        guideTitle: 'User Guide',
+        guideClose: 'Close Guide',
+        guideOverviewTitle: 'What is Ar-Rahnu Pro?',
+        guideOverviewBody: 'Ar-Rahnu Pro is a personal tool for calculating, tracking, and simulating Bank Rakyat Ar-Rahnu (Islamic pawn broking) costs. It helps you understand how much you can borrow against your gold, what the costs are, and manage your existing accounts — all in one place.',
+        guideStartTitle: 'Getting Started',
+        guideStart1: 'The gold price loads automatically when you open the app. If it fails, enter it manually in the header.',
+        guideStart2: 'Use the tabs at the top to switch between Calculator, Tracker, and Simulator.',
+        guideStart3: 'Switch language anytime using the EN/BM button. Your preference is saved automatically.',
+        guideGoldTitle: 'About Gold Price',
+        guideGoldBody: 'The gold price shown is the international spot price converted to RM/gram. Bank Rakyat may use a different valuation rate. For accurate calculations, enter the bank\'s quoted rate manually.',
+        guideCalcTitle: 'Calculator Tab',
+        guideWithdrawTitle: 'Withdrawable Amount',
+        guideWithdrawBody: 'Enter your gold weight and karat to instantly see the maximum amount you can withdraw (80% of gold value). The quick reference table below shows common weight/karat combinations.',
+        guideCalcMainTitle: 'Detailed Calculator',
+        guideCalcMainBody: 'Enter gold weight, karat, price, and adjust the financing percentage (50-80%) and tenure (6/12/18 months). Results update instantly showing marhun value, financing amount, monthly profit cost, and total repayment.',
+        guideFeeTitle: 'Fee & Charges Breakdown',
+        guideFeeBody: 'Shows a detailed breakdown of all costs: profit charge per cycle, daily/weekly costs, cost as percentage of gold value, and total cost summary. You can also add optional charges like insurance or processing fees.',
+        guideProfitTitle: 'Bank Rakyat Profit Rate Tiers',
+        guideRate: 'Rate per RM100/month',
+        guideTrackerTitle: 'Tracker Tab',
+        guideDashTitle: 'Dashboard',
+        guideDashBody: 'Shows totals across all your active accounts: total marhun value, total financing, monthly profit cost, next payment due date, and number of active accounts.',
+        guideAccountTitle: 'Managing Accounts',
+        guideAccountBody: 'Click "Add Account" to create a new account. Fill in the account number, dates, financing amount, and add your marhun items (gold details). Each item needs a description, karat, weight, and value.',
+        guidePaymentTitle: 'Payment Schedule',
+        guidePaymentBody: 'Each account shows 3 payment cycles (every 6 months). Click on a payment cycle to mark it as paid — it will turn green with a strikethrough.',
+        guideRolloverTitle: 'Rollover Chain',
+        guideRolloverBody: 'When creating a new account, select "Rolled Over From" to link it to a previous account. This creates a visual chain showing how accounts were renewed over time.',
+        guideExportTitle: 'Export & Import',
+        guideExportBody: 'Use Export to download all your accounts as a JSON file (for backup). Use Import to restore from a backup. You can choose to replace all data or merge with existing accounts.',
+        guideSimTitle: 'Simulator Tab',
+        guideScenarioTitle: 'Scenario Builder',
+        guideScenarioBody: 'Adjust gold price, weight, karat, financing %, and tenure using sliders. Results update in real-time showing what your costs would be under different conditions.',
+        guideCompareTitle: 'Compare Scenarios',
+        guideCompareBody: 'Click "Compare Scenarios" to open a side-by-side view. Scenario A uses your current inputs. Scenario B lets you set different values. The difference row highlights savings or extra costs.',
+        guidePresetsTitle: 'Quick Scenarios',
+        guidePresetsBody: 'One-click buttons to simulate gold price changes: +10%, -10%, +20%, -20%, or reset to current market price.',
+        guideAddGoldTitle: 'Add More Gold',
+        guideAddGoldBody: 'Calculate how much extra financing you could get by pledging additional gold on top of your current pledge.',
+        guideRolloverCalcTitle: 'Rollover vs Redeem',
+        guideRolloverCalcBody: 'Compare the cost of rolling over (renewing) your current pledge versus redeeming early and starting a fresh pledge. Adjust the months slider to see different redemption timing.',
+        guideEarlyTitle: 'Early Redemption',
+        guideEarlyBody: 'See how much you save by redeeming your gold before the full tenure. Slide the months to see profit paid so far, savings vs full tenure, and your net cost.',
+        guideTermsTitle: 'Key Terms / Istilah Penting',
+        termArrahnu: 'Islamic pawn broking based on Shariah principles',
+        termMarhun: 'Pledged item (gold/jewellery) used as collateral',
+        termMof: 'Maximum percentage of gold value that can be financed (up to 80%)',
+        termUpahSimpan: 'Storage/safekeeping fee — at Bank Rakyat this is included in the profit rate (no separate charge)',
+        termTawarruq: 'Islamic financing structure using commodity sale — the mechanism behind Ar-Rahnu financing',
+        termGadaiSemula: 'Rollover / renewal — redeeming and re-pledging to start a new tenure cycle',
+        guideTipsTitle: 'Tips',
+        guideTip1: 'Always use Bank Rakyat\'s quoted gold valuation rate (not spot price) for the most accurate calculations.',
+        guideTip2: 'Pay attention to payment due dates — late payment can result in your gold being forfeited.',
+        guideTip3: 'Consider early redemption if you have the funds — you save on profit charges for the remaining months.',
+        guideTip4: 'Use the Simulator to compare rollover vs redemption before deciding to renew your pledge.',
+        guideTip5: 'Export your data regularly as a backup — all data is stored locally in your browser only.',
       },
       bm: {
         goldPrice: 'Harga Emas',
@@ -1265,6 +1484,63 @@
         effectiveCostPct: 'Kos Efektif %',
         latePaymentNote: 'Nota: Pembayaran lewat boleh menyebabkan marhun (barang gadaian) dilucuthak. Sentiasa pastikan pembayaran dibuat sebelum tarikh akhir setiap kitaran.',
         monthsShort: 'b',
+        // User Guide
+        guideTitle: 'Panduan Pengguna',
+        guideClose: 'Tutup Panduan',
+        guideOverviewTitle: 'Apa itu Ar-Rahnu Pro?',
+        guideOverviewBody: 'Ar-Rahnu Pro ialah alat peribadi untuk mengira, menjejak, dan mensimulasi kos Ar-Rahnu (pajak gadai Islam) Bank Rakyat. Ia membantu anda memahami berapa banyak yang boleh dipinjam menggunakan emas, berapakah kosnya, dan menguruskan akaun sedia ada — semuanya di satu tempat.',
+        guideStartTitle: 'Cara Bermula',
+        guideStart1: 'Harga emas dimuat secara automatik semasa membuka aplikasi. Jika gagal, masukkan secara manual di bahagian atas.',
+        guideStart2: 'Gunakan tab di atas untuk beralih antara Kalkulator, Penjejak, dan Simulasi.',
+        guideStart3: 'Tukar bahasa bila-bila masa menggunakan butang EN/BM. Pilihan anda disimpan secara automatik.',
+        guideGoldTitle: 'Mengenai Harga Emas',
+        guideGoldBody: 'Harga emas yang dipaparkan ialah harga spot antarabangsa yang ditukar ke RM/gram. Bank Rakyat mungkin menggunakan kadar penilaian yang berbeza. Untuk pengiraan tepat, masukkan kadar yang diberikan oleh bank secara manual.',
+        guideCalcTitle: 'Tab Kalkulator',
+        guideWithdrawTitle: 'Jumlah Boleh Dikeluarkan',
+        guideWithdrawBody: 'Masukkan berat dan karat emas untuk melihat jumlah maksimum yang boleh dikeluarkan (80% daripada nilai emas). Jadual rujukan pantas di bawah menunjukkan kombinasi berat/karat yang lazim.',
+        guideCalcMainTitle: 'Kalkulator Terperinci',
+        guideCalcMainBody: 'Masukkan berat emas, karat, harga, dan laraskan peratusan pembiayaan (50-80%) serta tempoh (6/12/18 bulan). Keputusan dikemas kini serta-merta menunjukkan nilai marhun, jumlah pembiayaan, kos keuntungan bulanan, dan jumlah bayaran balik.',
+        guideFeeTitle: 'Pecahan Yuran & Caj',
+        guideFeeBody: 'Menunjukkan pecahan terperinci semua kos: caj keuntungan setiap kitaran, kos harian/mingguan, kos sebagai peratusan nilai emas, dan ringkasan jumlah kos. Anda juga boleh menambah caj pilihan seperti insurans atau yuran pemprosesan.',
+        guideProfitTitle: 'Tier Kadar Keuntungan Bank Rakyat',
+        guideRate: 'Kadar per RM100/bulan',
+        guideTrackerTitle: 'Tab Penjejak',
+        guideDashTitle: 'Papan Pemuka',
+        guideDashBody: 'Menunjukkan jumlah keseluruhan akaun aktif: jumlah nilai marhun, jumlah pembiayaan, kos keuntungan bulanan, tarikh bayaran seterusnya, dan bilangan akaun aktif.',
+        guideAccountTitle: 'Menguruskan Akaun',
+        guideAccountBody: 'Klik "Tambah Akaun" untuk membuat akaun baru. Isikan nombor akaun, tarikh, jumlah pembiayaan, dan tambah item marhun (butiran emas). Setiap item memerlukan keterangan, karat, berat, dan nilai.',
+        guidePaymentTitle: 'Jadual Pembayaran',
+        guidePaymentBody: 'Setiap akaun menunjukkan 3 kitaran pembayaran (setiap 6 bulan). Klik pada kitaran pembayaran untuk menandakannya sebagai telah dibayar — ia akan bertukar hijau dengan garisan.',
+        guideRolloverTitle: 'Rantaian Gadai Semula',
+        guideRolloverBody: 'Semasa membuat akaun baru, pilih "Digadai Semula Dari" untuk menghubungkannya dengan akaun sebelumnya. Ini mewujudkan rantaian visual yang menunjukkan bagaimana akaun diperbaharui dari masa ke masa.',
+        guideExportTitle: 'Eksport & Import',
+        guideExportBody: 'Gunakan Eksport untuk memuat turun semua akaun sebagai fail JSON (untuk sandaran). Gunakan Import untuk memulihkan dari sandaran. Anda boleh memilih untuk menggantikan semua data atau menggabungkan dengan akaun sedia ada.',
+        guideSimTitle: 'Tab Simulasi',
+        guideScenarioTitle: 'Pembina Senario',
+        guideScenarioBody: 'Laraskan harga emas, berat, karat, % pembiayaan, dan tempoh menggunakan peluncur. Keputusan dikemas kini secara masa nyata menunjukkan kos anda dalam keadaan yang berbeza.',
+        guideCompareTitle: 'Bandingkan Senario',
+        guideCompareBody: 'Klik "Bandingkan Senario" untuk membuka paparan sebelah-menyebelah. Senario A menggunakan input semasa anda. Senario B membolehkan anda menetapkan nilai berbeza. Baris perbezaan menunjukkan penjimatan atau kos tambahan.',
+        guidePresetsTitle: 'Senario Pantas',
+        guidePresetsBody: 'Butang satu klik untuk mensimulasikan perubahan harga emas: +10%, -10%, +20%, -20%, atau set semula ke harga pasaran semasa.',
+        guideAddGoldTitle: 'Tambah Lagi Emas',
+        guideAddGoldBody: 'Kira berapa banyak pembiayaan tambahan yang boleh diperolehi dengan menggadaikan emas tambahan di atas gadaian semasa anda.',
+        guideRolloverCalcTitle: 'Gadai Semula vs Tebus',
+        guideRolloverCalcBody: 'Bandingkan kos gadai semula (memperbaharui) gadaian semasa berbanding tebus awal dan memulakan gadaian baru. Laraskan peluncur bulan untuk melihat masa penebusan yang berbeza.',
+        guideEarlyTitle: 'Penebusan Awal',
+        guideEarlyBody: 'Lihat berapa banyak anda jimat dengan menebus emas sebelum tempoh penuh. Gerakkan peluncur bulan untuk melihat keuntungan yang telah dibayar, penjimatan berbanding tempoh penuh, dan kos bersih anda.',
+        guideTermsTitle: 'Istilah Penting / Key Terms',
+        termArrahnu: 'Pajak gadai Islam berdasarkan prinsip Syariah',
+        termMarhun: 'Barang gadaian (emas/barang kemas) yang digunakan sebagai cagaran',
+        termMof: 'Peratusan maksimum nilai emas yang boleh dibiayai (sehingga 80%)',
+        termUpahSimpan: 'Yuran simpanan/penyimpanan — di Bank Rakyat ini termasuk dalam kadar keuntungan (tiada caj berasingan)',
+        termTawarruq: 'Struktur pembiayaan Islam menggunakan penjualan komoditi — mekanisme di sebalik pembiayaan Ar-Rahnu',
+        termGadaiSemula: 'Pembaharuan — menebus dan menggadai semula untuk memulakan kitaran tempoh baru',
+        guideTipsTitle: 'Tips',
+        guideTip1: 'Sentiasa gunakan kadar penilaian emas Bank Rakyat (bukan harga spot) untuk pengiraan paling tepat.',
+        guideTip2: 'Beri perhatian kepada tarikh akhir pembayaran — pembayaran lewat boleh menyebabkan emas anda dilucuthak.',
+        guideTip3: 'Pertimbangkan penebusan awal jika anda mempunyai dana — anda jimat caj keuntungan untuk bulan yang tinggal.',
+        guideTip4: 'Gunakan Simulasi untuk membandingkan gadai semula vs penebusan sebelum memutuskan untuk memperbaharui gadaian.',
+        guideTip5: 'Eksport data anda secara berkala sebagai sandaran — semua data disimpan secara tempatan dalam pelayar anda sahaja.',
       },
     }
 
@@ -1337,6 +1613,7 @@
           accounts: [],
           showAccountForm: false,
           showExamples: false,
+          showGuide: false,
           editingAccountId: null,
           newAccount: {
             accountNo: '',
